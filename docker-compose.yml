@@ -1,0 +1,15 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16   # postgres:16 + the pgvector extension
+    environment:
+      POSTGRES_USER: met
+      POSTGRES_PASSWORD: met
+      POSTGRES_DB: met
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U met"]
+      interval: 5s
+      retries: 10
+volumes:
+  pgdata:

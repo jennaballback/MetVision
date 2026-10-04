@@ -1,0 +1,11 @@
+psycopg[binary]>=3.2
+pgvector>=0.3
+requests>=2.31
+numpy>=1.26
+pillow>=10.0
+streamlit>=1.38
+anthropic>=1.0
+# CLIP (CPU is fine: a few images/s). Install the CPU wheel of torch to save ~2GB:
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+torch>=2.2
+open_clip_torch>=2.24
