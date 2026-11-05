@@ -3,7 +3,7 @@ pgvector>=0.3
 requests>=2.31
 numpy>=1.26
 pillow>=10.0
-streamlit>=1.42   # segmented_control, container keys
+streamlit>=1.50   # segmented_control, pills, width="stretch"
 anthropic>=1.0
 # CLIP (CPU is fine: a few images/s). Install the CPU wheel of torch to save ~2GB:
 #   pip install torch --index-url https://download.pytorch.org/whl/cpu

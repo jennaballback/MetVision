@@ -1,12 +1,16 @@
-"""MetVision front end: describe, pick, or upload -> the ten most similar artworks.
+"""MetVision front end: describe, pick, or upload -> the ten most similar artworks,
+hung salon-style on a gallery wall.
 
     streamlit run app/streamlit_app.py
 """
 from __future__ import annotations
 
 import base64
+import html
+import io
 import sys
 from pathlib import Path
+from urllib.parse import urlencode
 
 import streamlit as st
 from PIL import Image
@@ -23,47 +27,97 @@ st.set_page_config(page_title="MetVision", page_icon="🖼️", layout="wide")
 settings = get_settings()
 
 MODES = ["Describe", "Similar to an artwork", "Upload a photo"]
-EXAMPLES = ["Japanese prints of birds", "woman reading by a window", "Egyptian cat sculpture",
-            "stormy sea at night", "misty mountains"]
+EXAMPLES = ["Japanese prints of birds", "woman reading by a window", "stormy sea at night", "misty mountains"]
 
 CSS = """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500&display=swap');
 html, body, [class*="css"], .stMarkdown, .stCaption, button, input { font-family: 'Inter', sans-serif; }
-h1, h2, h3, .mv-serif { font-family: 'Cormorant Garamond', Georgia, serif !important; font-weight: 600; }
-.block-container { padding-top: 4.5rem; max-width: 1400px; }
+h1, h2, h3 { font-family: 'Cormorant Garamond', Georgia, serif !important; font-weight: 600; }
+.block-container { padding-top: 4.5rem; max-width: 1500px; }
 [data-testid="stHeader"] { background: transparent; }
 
-.mv-hero { border-bottom: 1px solid #DDD5C8; padding-bottom: 1.1rem; margin-bottom: 1.2rem; }
-.mv-wordmark { font-family: 'Cormorant Garamond', Georgia, serif !important; font-size: 3.6rem !important; line-height: 1; font-weight: 600;
-               letter-spacing: .01em; margin: 0; color: #1F1B16; }
-.mv-wordmark span { color: #8C2F39; }
-.mv-tagline { color: #5E554A; font-size: 1.05rem; margin: .45rem 0 0; }
-.mv-stats { color: #8A8073; font-size: .8rem; margin-top: .35rem; letter-spacing: .02em; }
+/* ---------- header ---------- */
+.mv-hero { text-align: center; padding-bottom: 1.4rem; }
+.mv-kicker { font-size: .72rem; letter-spacing: .32em; text-transform: uppercase; color: #8C2F39; }
+.mv-wordmark { font-family: 'Cormorant Garamond', Georgia, serif !important; font-size: 4.6rem !important;
+               font-weight: 600; line-height: 1; color: #1F1B16; margin: .3rem 0 .2rem; }
+.mv-wordmark em { color: #8C2F39; font-style: italic; font-weight: 500; }
+.mv-tagline { font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-size: 1.35rem;
+              color: #5E554A; }
+.mv-stats { color: #8A8073; font-size: .74rem; letter-spacing: .06em; margin-top: .5rem; }
 
-/* gallery cards */
-.st-key-grid [data-testid="stImage"] img, .st-key-query [data-testid="stImage"] img {
-    height: 230px; width: 100%; object-fit: contain; background: #EFEAE1; border-radius: 6px; }
-.st-key-query [data-testid="stImage"] img { height: 340px; }
-.mv-title { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.15rem; font-weight: 600;
-            line-height: 1.2; margin: .45rem 0 .15rem; color: #1F1B16;
-            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-            min-height: 2.4em; }
-.mv-meta { color: #6F665B; font-size: .78rem; line-height: 1.35; height: 2.7em; overflow: hidden;
-           display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-.mv-chips { height: 1.9rem; }
-.mv-chip { display: inline-block; font-size: .68rem; letter-spacing: .06em; text-transform: uppercase;
-           color: #8C2F39; border: 1px solid #D9C3C0; border-radius: 999px; padding: .05rem .5rem;
-           margin: .25rem 0 .35rem; }
-.mv-rank { color: #A39888; font-size: .72rem; }
-.mv-label { font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: #8A8073; }
-.mv-detail dt { font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: #8A8073; margin-top: .6rem; }
+/* ---------- the gallery room ---------- */
+.mv-room { position: relative; margin: 1.4rem -1rem 0; border-radius: 4px; overflow: hidden;
+           box-shadow: 0 20px 40px rgba(40,30,20,.18); }
+.mv-wall { padding: 3.2rem 3rem 2.2rem;
+  background:
+    radial-gradient(ellipse 22% 55% at 15% 0%, rgba(255,236,200,.38), transparent 70%),
+    radial-gradient(ellipse 22% 55% at 50% 0%, rgba(255,236,200,.38), transparent 70%),
+    radial-gradient(ellipse 22% 55% at 85% 0%, rgba(255,236,200,.38), transparent 70%),
+    linear-gradient(180deg, #6E8196 0%, #7D90A4 55%, #74879B 100%);
+  border-top: 16px solid #EDE8DF; box-shadow: inset 0 10px 14px -8px rgba(0,0,0,.35); }
+.mv-baseboard { height: 16px; background: linear-gradient(#59636E, #46505A); }
+.mv-floor { height: 70px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.12), rgba(0,0,0,.25)),
+    repeating-linear-gradient(90deg, #8E5A2E 0 118px, #7A4A22 118px 120px, #9A6436 120px 240px, #7A4A22 240px 242px); }
+.mv-roomtitle { position: absolute; top: 26px; left: 0; right: 0; text-align: center;
+  font-family: 'Cormorant Garamond', Georgia, serif; font-size: .82rem; letter-spacing: .4em;
+  text-transform: uppercase; color: rgba(255,255,255,.75); }
+
+/* salon hang: masonry columns, frames of varying size */
+.mv-hang { column-count: 4; column-gap: 3rem; }
+@media (max-width: 1100px) { .mv-hang { column-count: 3; } }
+@media (max-width: 760px)  { .mv-hang { column-count: 2; column-gap: 1.6rem; } .mv-wall { padding: 2.4rem 1.2rem 1.6rem; } }
+.mv-piece { break-inside: avoid; display: flex; flex-direction: column; align-items: center;
+            margin: 0 auto 2.6rem; }
+.mv-frame { position: relative; display: block; box-shadow: 0 14px 22px rgba(10,15,25,.45), 0 3px 6px rgba(10,15,25,.3);
+            transition: transform .18s ease, box-shadow .18s ease; }
+.mv-frame:hover { transform: translateY(-3px) scale(1.015);
+                  box-shadow: 0 22px 32px rgba(10,15,25,.5), 0 4px 8px rgba(10,15,25,.3); }
+.mv-frame img { display: block; width: 100%; height: auto; }
+.mv-mat { background: #F4EFE4; box-shadow: inset 0 0 0 1px rgba(0,0,0,.12), inset 2px 3px 6px rgba(0,0,0,.18); }
+/* frame styles */
+.f-gold   { padding: 15px; background: linear-gradient(135deg, #8A6A26, #E9CF7A 22%, #A8822F 45%, #F3DD8E 62%, #8C6B25 85%, #C9A44A);
+            border-radius: 2px; }
+.f-gold .mv-mat { padding: 18px; }
+.f-gold::after { content: ""; position: absolute; inset: 6px; border: 2px solid rgba(90,64,18,.55); pointer-events: none; }
+.f-walnut { padding: 13px; background: linear-gradient(135deg, #3B2414, #6B4426 40%, #4A2D18 70%, #2E1B0E); }
+.f-walnut .mv-mat { padding: 0; }
+.f-black  { padding: 7px; background: #141414; }
+.f-black .mv-mat { padding: 30px; background: #FBFAF7; }
+.f-silver { padding: 11px; background: linear-gradient(135deg, #8E9296, #E3E6E8 35%, #A2A7AB 60%, #D4D7DA); }
+.f-silver .mv-mat { padding: 14px; }
+.f-selected { outline: 3px solid rgba(255,236,200,.9); outline-offset: 10px; }
+
+/* museum wall label */
+.mv-label-card { margin-top: 1.1rem; background: #FBF9F4; padding: .55rem .75rem .5rem; width: 82%;
+                 max-width: 230px; box-shadow: 0 2px 5px rgba(10,15,25,.3); }
+.mv-lt { font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-size: 1.02rem; line-height: 1.15;
+         color: #1F1B16; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.mv-lm { font-size: .68rem; color: #5E554A; margin-top: .2rem; line-height: 1.35; }
+.mv-la { margin-top: .35rem; font-size: .62rem; letter-spacing: .14em; text-transform: uppercase; }
+.mv-la a { color: #8C2F39 !important; text-decoration: none; margin-right: .9rem; }
+.mv-la a:hover { text-decoration: underline; }
+
+/* featured (selected / uploaded) piece */
+.mv-featured { display: flex; justify-content: center; margin: .4rem 0 3rem; }
+.mv-featured .mv-frame { width: min(380px, 70%); }
+.mv-eyebrow { font-size: .62rem; letter-spacing: .2em; text-transform: uppercase; color: #8C2F39; }
+.mv-empty { text-align: center; color: rgba(255,255,255,.85); font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 1.4rem; font-style: italic; padding: 3rem 0 2rem; }
+
+/* detail dialog */
+[data-testid="stDialog"] img, div[role="dialog"] img { max-height: 62vh !important; width: 100%; object-fit: contain; }
+.mv-detail dt { font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; color: #8A8073; margin-top: .6rem; }
 .mv-detail dd { margin: 0; color: #1F1B16; }
-[data-testid="stDialog"] img, div[role="dialog"] img { max-height: 65vh !important; width: 100%; object-fit: contain;
-    background: #EFEAE1; border-radius: 6px; }
-.mv-footer { color: #8A8073; font-size: .75rem; border-top: 1px solid #DDD5C8; margin-top: 2.5rem; padding-top: .8rem; }
+.mv-footer { color: #8A8073; font-size: .75rem; text-align: center; margin-top: 2rem; }
 </style>
 """
+
+FRAMES = ["f-gold", "f-walnut", "f-gold", "f-black", "f-silver", "f-gold", "f-walnut"]
+WIDTHS = [100, 82, 92, 74, 88, 96, 80]   # % of column width: the salon hang's varied sizes
 
 
 # ---------------------------------------------------------------- data access
@@ -90,11 +144,14 @@ def facets():
     return depts, stats
 
 
-@st.cache_data(ttl=600)
-def local_paths(ids: tuple[int, ...]) -> dict[int, str]:
-    rows = conn().execute("SELECT object_id, local_path FROM object_images WHERE object_id = ANY(%s) "
-                          "AND status = 'ok'", (list(ids),))
-    return {r[0]: r[1] for r in rows if r[1] and Path(r[1]).exists()}
+@st.cache_data(ttl=3600, show_spinner=False)
+def image_data_uri(object_id: int, fallback_url: str) -> str:
+    """Inline the cached JPEG (works offline and avoids hot-linking); else the Met's URL."""
+    row = conn().execute("SELECT local_path FROM object_images WHERE object_id = %s AND status = 'ok'",
+                         (object_id,)).fetchone()
+    if row and row[0] and Path(row[0]).exists():
+        return "data:image/jpeg;base64," + base64.b64encode(Path(row[0]).read_bytes()).decode()
+    return fallback_url
 
 
 @st.cache_data(ttl=600)
@@ -110,22 +167,101 @@ def artwork(object_id: int) -> dict | None:
     return dict(zip([c.name for c in cur.description], row)) if row else None
 
 
-def image_src(r: dict) -> str:
-    return local_paths((r["object_id"],)).get(r["object_id"]) or r["image_small_url"]
+@st.cache_data(ttl=3600)
+def todays_hang(n: int = 12) -> list[dict]:
+    """A different random wall each day, for the landing page."""
+    from datetime import date
+
+    from metsearch.search import fetch_rows
+    ids = [r[0] for r in conn().execute(
+        "SELECT object_id FROM object_embeddings ORDER BY md5(object_id::text || %s) LIMIT %s",
+        (date.today().isoformat(), n))]
+    return fetch_rows(conn(), [(i, 0.0) for i in ids])
 
 
-# ---------------------------------------------------------------- actions
+# ---------------------------------------------------------------- routing
+# Frames on the wall are plain HTML links, so clicks travel through the URL:
+#   ?m=<mode index>&q=<text>&pick=<object id>&detail=<object id>
+def href(**changes) -> str:
+    state = {"m": MODES.index(st.session_state.get("mode") or MODES[0]),
+             "q": st.session_state.get("query", ""), "pick": st.session_state.get("picked")}
+    state.update(changes)
+    return "?" + urlencode({k: v for k, v in state.items() if v not in (None, "")})
+
+
+def apply_url():
+    """Copy URL parameters into session state once per distinct URL; return a detail id to open."""
+    qp = st.query_params
+    sig = urlencode(sorted(qp.to_dict().items()))
+    if st.session_state.get("_applied") == sig:
+        return None
+    st.session_state["_applied"] = sig
+    if qp.get("m", "").isdigit() and int(qp["m"]) < len(MODES):
+        st.session_state["mode"] = MODES[int(qp["m"])]
+    if "q" in qp:
+        st.session_state["query"] = qp["q"]
+    if qp.get("pick", "").isdigit():
+        st.session_state["picked"] = int(qp["pick"])
+    return int(qp["detail"]) if qp.get("detail", "").isdigit() else None
+
+
 def pick(object_id: int):
-    """Switch to the similarity view for this artwork."""
     st.session_state["picked"] = object_id
     st.session_state["mode"] = MODES[1]
 
 
-def set_query(text: str):
-    st.session_state["query"] = text
+def use_example():
+    if st.session_state.get("example"):
+        st.session_state["query"] = st.session_state["example"]
+    st.session_state["example"] = None
 
 
-@st.dialog("Artwork", width="large")
+# ---------------------------------------------------------------- rendering
+def esc(v) -> str:
+    return html.escape(str(v)) if v not in (None, "") else ""
+
+
+def framed(src: str, frame: str, width: int, link: str | None, extra: str = "") -> str:
+    tag, attrs = ("a", f"href='{link}' target='_self'") if link else ("span", "")
+    return (f"<{tag} {attrs} class='mv-frame {frame} {extra}' style='width:{width}%'>"
+            f"<span class='mv-mat' style='display:block'><img src='{src}' alt='' loading='lazy'></span></{tag}>")
+
+
+def wall_label(r: dict, actions: bool = True, eyebrow: str = "") -> str:
+    meta = "<br>".join(x for x in [esc(r.get("artist")),
+                                   ", ".join(esc(m) for m in [r.get("culture"), r.get("object_date")] if m),
+                                   esc(r.get("classification"))] if x)
+    acts = ""
+    if actions:
+        acts = (f"<div class='mv-la'><a href='{href(m=1, pick=r['object_id'])}' target='_self'>Similar</a>"
+                f"<a href='{href(detail=r['object_id'])}' target='_self'>Details</a></div>")
+    eb = f"<div class='mv-eyebrow'>{eyebrow}</div>" if eyebrow else ""
+    return (f"<div class='mv-label-card'>{eb}<div class='mv-lt'>{esc(r.get('title')) or 'Untitled'}</div>"
+            f"<div class='mv-lm'>{meta}</div>{acts}</div>")
+
+
+def gallery_wall(results: list[dict], room: str, featured_html: str = "", empty: str = ""):
+    pieces = []
+    for r in results:
+        oid = r["object_id"]
+        frame, width = FRAMES[oid % len(FRAMES)], WIDTHS[(oid // 7) % len(WIDTHS)]
+        src = image_data_uri(oid, r["image_small_url"])
+        pieces.append(f"<div class='mv-piece'>{framed(src, frame, width, href(detail=oid))}{wall_label(r)}</div>")
+    body = (f"<div class='mv-hang'>{''.join(pieces)}</div>" if pieces
+            else f"<div class='mv-empty'>{empty or 'Nothing on this wall yet.'}</div>")
+    st.markdown(
+        f"<div class='mv-room'><div class='mv-roomtitle'>{esc(room)}</div>"
+        f"<div class='mv-wall'>{featured_html}{body}</div>"
+        "<div class='mv-baseboard'></div><div class='mv-floor'></div></div>",
+        unsafe_allow_html=True)
+
+
+def featured(src: str, label_html: str) -> str:
+    return (f"<div class='mv-featured'><div class='mv-piece' style='margin:0'>"
+            f"{framed(src, 'f-gold', 100, None, 'f-selected')}{label_html}</div></div>")
+
+
+@st.dialog("On view", width="large")
 def detail(object_id: int):
     a = artwork(object_id)
     if not a:
@@ -133,49 +269,21 @@ def detail(object_id: int):
         return
     left, right = st.columns([3, 2], gap="large")
     with left:
-        st.image(image_src(a), use_container_width=True)
+        st.image(image_data_uri(object_id, a["image_small_url"]), width="stretch")
     with right:
-        st.markdown(f"<h2 style='margin-top:0'>{a['title'] or 'Untitled'}</h2>", unsafe_allow_html=True)
+        st.markdown(f"<h2 style='margin-top:0;font-style:italic'>{esc(a['title']) or 'Untitled'}</h2>",
+                    unsafe_allow_html=True)
         fields = [("Artist", a["artist"]), ("Date", a["object_date"]), ("Culture", a["culture"]),
                   ("Period", a["period"]), ("Medium", a["medium"]), ("Classification", a["classification"]),
                   ("Department", a["department"]), ("Tags", ", ".join(a["tags"]))]
         st.markdown("<dl class='mv-detail'>" + "".join(
-            f"<dt>{k}</dt><dd>{v}</dd>" for k, v in fields if v) + "</dl>", unsafe_allow_html=True)
+            f"<dt>{k}</dt><dd>{esc(v)}</dd>" for k, v in fields if v) + "</dl>", unsafe_allow_html=True)
         st.write("")
         if a["object_url"]:
-            st.link_button("View on metmuseum.org ↗", a["object_url"], use_container_width=True)
-        if st.button("Find similar artworks", type="primary", use_container_width=True,
+            st.link_button("View on metmuseum.org ↗", a["object_url"], width="stretch")
+        if st.button("Find similar artworks", type="primary", width="stretch",
                      on_click=pick, args=(object_id,)):
             st.rerun()
-
-
-def card(r: dict, key: str):
-    st.image(image_src(r), use_container_width=True)
-    st.markdown(f"<div class='mv-title' title=\"{r['title'] or ''}\">{r['title'] or 'Untitled'}</div>",
-                unsafe_allow_html=True)
-    meta = " · ".join(m for m in [r.get("artist"), r.get("culture"), r.get("object_date")] if m)
-    st.markdown(f"<div class='mv-meta'>{meta or '&nbsp;'}</div>"
-                + "<div class='mv-chips'>"
-                + (f"<span class='mv-chip'>{r['classification']}</span>" if r.get("classification") else "")
-                + "</div>",
-                unsafe_allow_html=True)
-    b1, b2 = st.columns(2)
-    b1.button("Similar", key=f"{key}-sim-{r['object_id']}", on_click=pick, args=(r["object_id"],),
-              use_container_width=True)
-    if b2.button("Details", key=f"{key}-det-{r['object_id']}", use_container_width=True):
-        detail(r["object_id"])
-
-
-def gallery(results: list[dict], key: str, columns: int = 5):
-    if not results:
-        st.info("No matches. Try loosening the filters in the sidebar.")
-        return
-    with st.container(key="grid"):
-        for start in range(0, len(results), columns):
-            cols = st.columns(columns, gap="medium")
-            for i, r in enumerate(results[start:start + columns]):
-                with cols[i]:
-                    card(r, key)
 
 
 def sidebar_filters(departments: list[str]) -> Filters:
@@ -199,12 +307,12 @@ def why_similar(a_id: int, b_id: int) -> str:
     """Optional: Claude looks at both images and writes one sentence."""
     import anthropic
 
-    paths = local_paths((a_id, b_id))
-
     def img_block(oid):
-        data = Path(paths[oid]).read_bytes()
+        uri = image_data_uri(oid, "")
+        if not uri.startswith("data:"):
+            raise RuntimeError("image not cached locally")
         return {"type": "image", "source": {"type": "base64", "media_type": "image/jpeg",
-                                            "data": base64.b64encode(data).decode()}}
+                                            "data": uri.split(",", 1)[1]}}
 
     resp = anthropic.Anthropic().messages.create(
         model=settings.anthropic_model, max_tokens=2000, output_config={"effort": "low"},
@@ -217,100 +325,111 @@ def why_similar(a_id: int, b_id: int) -> str:
 
 # ---------------------------------------------------------------- page
 st.markdown(CSS, unsafe_allow_html=True)
+open_detail = apply_url()
 departments, (n_objects, n_embedded) = facets()
 st.markdown(
     f"""<div class="mv-hero">
-      <div class="mv-wordmark">Met<span>Vision</span></div>
-      <div class="mv-tagline">Find artworks that look alike across the Metropolitan Museum's open-access collection.</div>
-      <div class="mv-stats">{n_embedded:,} artworks searchable · ranked by CLIP image embeddings in pgvector ·
-      Claude only turns sentences into filters</div>
+      <div class="mv-kicker">The open-access collection, rehung by likeness</div>
+      <div class="mv-wordmark">Met<em>Vision</em></div>
+      <div class="mv-tagline">Describe a picture, choose a work, or bring a photo. We'll hang its closest relatives.</div>
+      <div class="mv-stats">{n_embedded:,} WORKS ON VIEW · CLIP EMBEDDINGS · PGVECTOR · CLAUDE-PARSED FILTERS</div>
     </div>""", unsafe_allow_html=True)
 filters = sidebar_filters(departments)
 
 st.session_state.setdefault("mode", MODES[0])
-mode = st.segmented_control("Search by", MODES, key="mode", label_visibility="collapsed") or MODES[0]
+_, mid, _ = st.columns([1, 2, 1])
+with mid:
+    mode = st.segmented_control("Search by", MODES, key="mode", label_visibility="collapsed") or MODES[0]
 
 if mode == MODES[0]:
-    q = st.text_input("Describe what you're looking for", key="query",
-                      placeholder="e.g. Japanese woodblock prints of birds from the 1800s")
-    chips = st.columns(len(EXAMPLES))
-    for c, ex in zip(chips, EXAMPLES):
-        c.button(ex, key=f"ex-{ex}", on_click=set_query, args=(ex,), use_container_width=True)
-    use_claude = st.toggle("Let Claude turn the sentence into filters", value=True,
-                           help="Claude reads the sentence and fills in culture, classification and dates. "
-                                "The ranking itself is pure vector search.")
+    _, mid, _ = st.columns([1, 4, 1])
+    with mid:
+        q = st.text_input("Describe what you're looking for", key="query", label_visibility="collapsed",
+                          placeholder="Describe a picture: “Japanese woodblock prints of birds from the 1800s”")
+        st.pills("Try", EXAMPLES, key="example", on_change=use_example, label_visibility="collapsed")
+        use_claude = st.toggle("Let Claude turn the sentence into filters", value=True,
+                               help="Claude reads the sentence and fills in culture, classification and dates. "
+                                    "The ranking itself is pure vector search.")
     if q:
         text, f = q, filters
+        note = ""
         if use_claude:
             parsed = parse_query(q, departments, model=settings.anthropic_model)
             if parsed.fallback:
-                st.caption("Claude isn't available (no API key set), so this searches the raw text.")
+                note = "Claude isn't available (no API key set), so this searches the raw text."
             else:
                 text = parsed.free_text
                 f = Filters(**{**parsed.filters.__dict__, **{k: v for k, v in filters.__dict__.items() if v}})
                 applied = [f"{k.replace('_', ' ')}: {v}" for k, v in parsed.raw.items()
                            if v not in (None, "", []) and k != "free_text"]
                 if applied:
-                    st.caption("Filters from Claude → " + " · ".join(applied)
-                               + (f" · looking for “{text}”" if text else ""))
-        st.write("")
-        gallery(search_by_text(conn(), text, embedder(), k=10, filters=f), "text")
+                    note = "Filters from Claude → " + " · ".join(applied) + (f" · looking for “{text}”" if text else "")
+        if note:
+            _, mid, _ = st.columns([1, 4, 1])
+            mid.caption(note)
+        gallery_wall(search_by_text(conn(), text, embedder(), k=10, filters=f), f"“{q}”")
+    else:
+        gallery_wall(todays_hang(), "On view today")
 
 elif mode == MODES[1]:
-    c1, c2 = st.columns([4, 1], vertical_alignment="bottom")
-    title_q = c1.text_input("Find an artwork by title", placeholder="Type part of a title")
-    if c2.button("Surprise me", use_container_width=True):
-        st.session_state["picked"] = conn().execute(
-            "SELECT object_id FROM object_embeddings ORDER BY random() LIMIT 1").fetchone()[0]
-    if title_q:
-        opts = conn().execute("SELECT o.object_id, o.title FROM objects o JOIN object_embeddings USING (object_id) "
-                              "WHERE o.title ILIKE %s ORDER BY o.title LIMIT 50", (f"%{title_q}%",)).fetchall()
-        if opts:
-            choice = st.selectbox("Matches", opts, format_func=lambda r: f"{r[1]} ({r[0]})")
-            st.button("Use this artwork", on_click=pick, args=(choice[0],))
-        else:
-            st.caption("No titles match.")
-    picked = st.session_state.get("picked")
-    if not picked:
-        st.info("Pick an artwork by title, press Surprise me, or press Similar on any result.")
-    else:
-        a = artwork(picked)
+    _, mid, _ = st.columns([1, 4, 1])
+    with mid:
+        c1, c2 = st.columns([4, 1], vertical_alignment="bottom")
+        title_q = c1.text_input("Find an artwork by title", placeholder="Type part of a title")
+        if c2.button("Surprise me", width="stretch"):
+            st.session_state["picked"] = conn().execute(
+                "SELECT object_id FROM object_embeddings ORDER BY random() LIMIT 1").fetchone()[0]
+        if title_q:
+            opts = conn().execute("SELECT o.object_id, o.title FROM objects o JOIN object_embeddings USING (object_id) "
+                                  "WHERE o.title ILIKE %s ORDER BY o.title LIMIT 50", (f"%{title_q}%",)).fetchall()
+            if opts:
+                choice = st.selectbox("Matches", opts, format_func=lambda r: f"{r[1]} ({r[0]})")
+                st.button("Hang this one", on_click=pick, args=(choice[0],))
+            else:
+                st.caption("No titles match.")
         sim_mode = st.radio("Similarity", ["Visual", "Visual + description"], horizontal=True,
                             help="Visual: image embeddings only. Visual + description: also fuses "
                                  "title, medium and tags, ranked together.")
+    picked = st.session_state.get("picked")
+    a = artwork(picked) if picked else None
+    if not a:
+        gallery_wall([], "Gallery", empty="Pick a work by title, press Surprise me, or choose Similar on any label.")
+    else:
         results = similar_to_object(conn(), picked, k=10, filters=filters,
                                     mode="image" if sim_mode == "Visual" else "hybrid")
-        left, right = st.columns([1, 4], gap="large")
-        with left, st.container(key="query"):
-            st.markdown("<div class='mv-label'>Selected</div>", unsafe_allow_html=True)
-            st.image(image_src(a), use_container_width=True)
-            st.markdown(f"<div class='mv-title'>{a['title'] or 'Untitled'}</div>"
-                        f"<div class='mv-meta'>{' · '.join(m for m in [a['culture'], a['object_date']] if m)}</div>",
-                        unsafe_allow_html=True)
-            if st.button("Details", key="query-details", use_container_width=True):
-                detail(picked)
-            if results and st.button("Why is the top match similar?", use_container_width=True,
+        feat = featured(image_data_uri(picked, a["image_small_url"]), wall_label(a, eyebrow="Selected work"))
+        gallery_wall(results, "Kindred works", featured_html=feat)
+        st.write("")
+        _, mid, _ = st.columns([1, 2, 1])
+        with mid:
+            if results and st.button("Why is the closest match similar?", width="stretch",
                                      help="Claude looks at both images (needs an API key)."):
                 try:
                     st.info(why_similar(picked, results[0]["object_id"]))
                 except Exception as exc:  # noqa: BLE001
                     st.caption(f"Claude isn't available: {exc}")
-        with right:
-            st.markdown("<div class='mv-label'>Most similar</div>", unsafe_allow_html=True)
-            gallery(results, "pick", columns=4)
 
 else:
-    up = st.file_uploader("Upload a photo of anything", type=["jpg", "jpeg", "png", "webp"])
+    _, mid, _ = st.columns([1, 2, 1])
+    with mid:
+        up = st.file_uploader("Bring a photo of anything", type=["jpg", "jpeg", "png", "webp"])
     if up:
         img = Image.open(up).convert("RGB")
-        left, right = st.columns([1, 4], gap="large")
-        with left, st.container(key="query"):
-            st.markdown("<div class='mv-label'>Your photo</div>", unsafe_allow_html=True)
-            st.image(img, use_container_width=True)
-        with right:
-            st.markdown("<div class='mv-label'>Most similar</div>", unsafe_allow_html=True)
-            vec = embedder().embed_images([img])[0]
-            gallery(search_by_image(conn(), vec, k=10, filters=filters), "upload", columns=4)
+        thumb = img.copy()
+        thumb.thumbnail((600, 600))
+        buf = io.BytesIO()
+        thumb.save(buf, "JPEG", quality=85)
+        src = "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode()
+        vec = embedder().embed_images([img])[0]
+        label = ("<div class='mv-label-card'><div class='mv-eyebrow'>Your photo</div>"
+                 f"<div class='mv-lt'>{esc(up.name)}</div></div>")
+        gallery_wall(search_by_image(conn(), vec, k=10, filters=filters), "Kindred works",
+                     featured_html=featured(src, label))
+    else:
+        gallery_wall([], "Gallery", empty="Upload a photo to see which artworks it resembles.")
+
+if open_detail:
+    detail(open_detail)
 
 st.markdown(
     "<div class='mv-footer'>Images and data: The Metropolitan Museum of Art Open Access (CC0). "
