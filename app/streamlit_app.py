@@ -48,12 +48,12 @@ h1, h2, h3 { font-family: 'Cormorant Garamond', Georgia, serif !important; font-
 .block-container { padding-top: 0; padding-bottom: 0; max-width: 1480px; }
 
 /* hero: a full-bleed Deep Water banner that holds the search itself */
-.st-key-hero { position: relative; padding: 4.6rem 0 2.8rem; margin-bottom: .6rem; }
+.st-key-hero { position: relative; padding: 1.6rem 0 2.4rem; margin-bottom: .6rem; }
 .st-key-hero::before { content: ""; position: absolute; z-index: 0; top: -40px; bottom: 0; left: calc(50% - 50vw); width: 100vw;
   background:
     radial-gradient(ellipse 50% 110% at 50% -10%, rgba(255,255,255,.22), transparent 70%),
     linear-gradient(160deg, #919E86 0%, #829076 50%, #75836A 100%);
-  border-bottom: 10px solid #B8913C; box-shadow: 0 6px 14px rgba(0,0,0,.35); }   /* gilt picture rail */
+  box-shadow: 0 6px 14px rgba(47,64,61,.18); }
 .st-key-hero > * { position: relative; z-index: 1; }
 .mv-hero { text-align: center; padding-bottom: 1.2rem; }
 .mv-kicker { font-size: .7rem; letter-spacing: .34em; text-transform: uppercase; color: #2F403D; }
@@ -408,7 +408,6 @@ departments, (n_objects, n_embedded) = facets()
 hero = st.container(key="hero")
 hero.markdown(
     f"""<div class="mv-hero">
-      <div class="mv-kicker">The open-access collection, rehung by likeness</div>
       <div class="mv-wordmark">Met<em>Vision</em></div>
       <div class="mv-tagline">Describe a picture, choose a work, or bring a photo. We'll hang its closest relatives.</div>
       <div class="mv-stats">{n_embedded:,} WORKS ON VIEW · CLIP EMBEDDINGS · PGVECTOR · CLAUDE-PARSED FILTERS</div>
