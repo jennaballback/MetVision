@@ -1,6 +1,6 @@
-# Met Museum visual search
+# MetVision
 
-Click an artwork, upload a photo, or type "a woman reading by a window", and get the ten most
+MetVision is visual search over the Met's open-access collection. Click an artwork, upload a photo, or type "a woman reading by a window", and get the ten most
 visually similar pieces from the Metropolitan Museum's open-access collection, with optional
 filters for department, culture, classification and date.
 

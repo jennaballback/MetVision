@@ -22,7 +22,7 @@ def image_path(image_dir: Path, object_id: int) -> Path:
 
 
 def download_images(conn: psycopg.Connection, image_dir: Path, rate_per_second: float = 5,
-                    user_agent: str = "met-visual-search", workers: int = 4,
+                    user_agent: str = "metvision", workers: int = 4,
                     limit: int | None = None, run_id: int | None = None) -> dict:
     """Download images for objects with no successful object_images row.
 

@@ -51,7 +51,7 @@ class Settings:
     # "clip" for real use; "fake" is a deterministic stand-in for tests/offline dev.
     embedder: str = field(default_factory=lambda: os.getenv("EMBEDDER", "clip"))
     user_agent: str = field(default_factory=lambda: os.getenv(
-        "USER_AGENT", "met-visual-search/0.1 (portfolio project; polite crawler)"))
+        "USER_AGENT", "metvision/0.1 (portfolio project; polite crawler)"))
     anthropic_model: str = field(default_factory=lambda: os.getenv("ANTHROPIC_MODEL", "claude-opus-5-5"))
 
 

@@ -19,7 +19,7 @@ from metsearch.embed import get_embedder  # noqa: E402
 from metsearch.nl_filter import parse_query  # noqa: E402
 from metsearch.search import Filters, search_by_image, search_by_text, similar_to_object  # noqa: E402
 
-st.set_page_config(page_title="Met visual search", layout="wide")
+st.set_page_config(page_title="MetVision", layout="wide")
 settings = get_settings()
 
 
@@ -107,7 +107,7 @@ def why_similar(a: dict, b: dict) -> str:
 
 
 departments, (n_objects, n_embedded) = facets()
-st.title("Met Museum visual search")
+st.title("MetVision")
 st.caption(f"{n_embedded:,} of {n_objects:,} open-access artworks embedded with `{embedder().name}`. "
            "Rankings come from CLIP vectors in pgvector; Claude only parses filters.")
 filters = sidebar_filters(departments)

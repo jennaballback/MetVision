@@ -1,1 +1,1 @@
-"""Met Museum visual search: ingestion, CLIP embeddings, pgvector search, eval."""
+"""MetVision: ingestion, CLIP embeddings, pgvector search, eval."""

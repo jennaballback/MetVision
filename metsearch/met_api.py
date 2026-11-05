@@ -49,7 +49,7 @@ class MetApiError(RuntimeError):
 class MetClient:
     RETRY_STATUSES = {403, 429, 500, 502, 503, 504}  # the Met's CDN answers bursts with 403
 
-    def __init__(self, base_url: str, rate_per_second: float = 15, user_agent: str = "met-visual-search",
+    def __init__(self, base_url: str, rate_per_second: float = 15, user_agent: str = "metvision",
                  max_retries: int = 5, timeout: float = 30, session: requests.Session | None = None):
         self.base_url = base_url.rstrip("/")
         self.limiter = RateLimiter(rate_per_second)

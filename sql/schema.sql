@@ -1,4 +1,4 @@
--- Met Museum visual search schema.
+-- MetVision schema.
 -- Staging tables hold raw API responses (ELT); core tables are rebuilt from staging
 -- by sql/transform.sql with idempotent upserts.
 
