@@ -31,7 +31,7 @@ def connection(url: str | None = None) -> Iterator[psycopg.Connection]:
 
 def init_db(conn: psycopg.Connection) -> None:
     """Create the extension and all tables. Safe to run repeatedly."""
-    conn.execute((SQL_DIR / "schema.sql").read_text())
+    conn.execute((SQL_DIR / "schema.sql").read_text(encoding="utf-8"))
     conn.commit()
     register_vector(conn)
 
