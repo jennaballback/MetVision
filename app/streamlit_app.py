@@ -58,8 +58,8 @@ h1, h2, h3 { font-family: 'Cormorant Garamond', Georgia, serif !important; font-
 .mv-hero { text-align: center; padding-bottom: 1.2rem; }
 .mv-kicker { font-size: .7rem; letter-spacing: .34em; text-transform: uppercase; color: #2F403D; }
 .mv-wordmark { font-family: 'Cormorant Garamond', Georgia, serif !important; font-size: 5.4rem !important;
-               font-weight: 600; line-height: 1; color: #F7F7F8; margin: .35rem 0 .25rem;
-               text-shadow: 0 2px 16px rgba(47,64,61,.35); }
+               font-weight: 600; line-height: 1; color: #2F403D; margin: .35rem 0 .25rem;
+               text-shadow: 0 1px 0 rgba(255,255,255,.25); }
 .mv-wordmark em { color: #425854; text-shadow: none; font-style: italic; font-weight: 500; }
 .mv-tagline { font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-size: 1.35rem; color: #2F403D; }
 .mv-stats { color: #425854; font-size: .68rem; letter-spacing: .1em; margin-top: .5rem; }
