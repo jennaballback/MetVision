@@ -40,36 +40,72 @@ h1, h2, h3 { font-family: 'Cormorant Garamond', Georgia, serif !important; font-
 /* ---------- the whole page is the gallery wall ---------- */
 .stApp {
   background:
-    radial-gradient(ellipse 30% 420px at 18% 0, rgba(250,250,252,.9), transparent 75%),
-    radial-gradient(ellipse 30% 420px at 50% 0, rgba(250,250,252,.9), transparent 75%),
-    radial-gradient(ellipse 30% 420px at 82% 0, rgba(250,250,252,.9), transparent 75%),
-    linear-gradient(180deg, #E1E1E3 0%, #D7D7D9 55%, #CBCBCE 100%);
-  background-attachment: fixed;
+    radial-gradient(ellipse 26% 520px at 15% 430px, rgba(255,214,228,.16), transparent 75%),
+    radial-gradient(ellipse 26% 520px at 50% 430px, rgba(255,214,228,.16), transparent 75%),
+    radial-gradient(ellipse 26% 520px at 85% 430px, rgba(255,214,228,.16), transparent 75%),
+    linear-gradient(180deg, #5E4454 0%, #553C4B 50%, #4A3341 100%);
 }
-/* the palette as a thin band across the top: Rosebud, Deep Water, Glare, Rose Leaf, Lily Leaf */
-.stApp::before { content: ""; position: fixed; top: 0; left: 0; right: 0; height: 6px; z-index: 1000000;
-  background: linear-gradient(90deg, #553C4B 0 20%, #51698A 20% 40%, #B9B9BE 40% 60%, #425854 60% 80%, #829076 80%); }
-.block-container { padding-top: 3.2rem; padding-bottom: 0; max-width: 1480px; }
+.block-container { padding-top: 0; padding-bottom: 0; max-width: 1480px; }
 
-/* header, lettered on the wall like an exhibition title */
-.mv-hero { text-align: center; padding-bottom: 1rem; }
-.mv-kicker { font-size: .7rem; letter-spacing: .34em; text-transform: uppercase; color: #553C4B; }
-.mv-wordmark { font-family: 'Cormorant Garamond', Georgia, serif !important; font-size: 4.8rem !important;
-               font-weight: 600; line-height: 1; color: #2F403D; margin: .35rem 0 .25rem;
-               text-shadow: 0 1px 0 rgba(255,255,255,.7); }
-.mv-wordmark em { color: #553C4B; font-style: italic; font-weight: 500; }
-.mv-tagline { font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-size: 1.3rem; color: #425854; }
-.mv-stats { color: #829076; font-size: .7rem; letter-spacing: .08em; margin-top: .45rem; }
-
-/* the control rail at the top: search mode, query, filters */
-.st-key-rail { background: rgba(255,255,255,.55); border: 1px solid rgba(81,105,138,.22); border-radius: 6px;
-               padding: .8rem 1rem .4rem; backdrop-filter: blur(4px); box-shadow: 0 2px 10px rgba(81,105,138,.08); }
-.mv-note { color: #5C6B60; font-size: .8rem; text-align: center; margin-top: .3rem; }
+/* hero: a full-bleed Deep Water banner that holds the search itself */
+.st-key-hero { position: relative; padding: 4.6rem 0 2.8rem; margin-bottom: .6rem; }
+.st-key-hero::before { content: ""; position: absolute; z-index: 0; top: -40px; bottom: 0; left: calc(50% - 50vw); width: 100vw;
+  background:
+    radial-gradient(ellipse 50% 110% at 50% -10%, rgba(255,255,255,.18), transparent 70%),
+    linear-gradient(160deg, #5C779B 0%, #51698A 50%, #4A5F72 100%);
+  border-bottom: 10px solid #B8913C; box-shadow: 0 6px 14px rgba(0,0,0,.35); }   /* gilt picture rail */
+.st-key-hero > * { position: relative; z-index: 1; }
+.mv-hero { text-align: center; padding-bottom: 1.2rem; }
+.mv-kicker { font-size: .7rem; letter-spacing: .34em; text-transform: uppercase; color: #C8D3B9; }
+.mv-wordmark { font-family: 'Cormorant Garamond', Georgia, serif !important; font-size: 5.4rem !important;
+               font-weight: 600; line-height: 1; color: #F2F2F4; margin: .35rem 0 .25rem;
+               text-shadow: 0 2px 18px rgba(20,30,50,.35); }
+.mv-wordmark em { color: #E9C7D6; font-style: italic; font-weight: 500; }
+.mv-tagline { font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-size: 1.35rem; color: #E1E6EC; }
+.mv-stats { color: #B9C7A9; font-size: .68rem; letter-spacing: .1em; margin-top: .5rem; }
+/* widgets on the banner: light text, no boxes */
+.st-key-hero p, .st-key-hero label, .st-key-hero [data-testid="stWidgetLabel"] p,
+.st-key-hero [data-testid="stMarkdownContainer"] p { color: #E8ECF0 !important; }
+.st-key-hero [data-testid="stTextInputRootElement"], .st-key-hero [data-baseweb="input"],
+.st-key-hero [data-baseweb="base-input"] { background: transparent !important; border: none !important;
+  border-radius: 0 !important; }
+.st-key-hero [data-testid="stTextInputRootElement"] { border-bottom: 1.5px solid rgba(242,242,244,.75) !important; }
+.st-key-hero input { background: transparent !important; color: #FFFFFF !important; text-align: center;
+  font-family: 'Cormorant Garamond', Georgia, serif !important; font-size: 1.6rem !important; font-style: italic;
+  caret-color: #E9C7D6; padding: .4rem 0 !important; }
+.st-key-hero input::placeholder { color: rgba(232,236,240,.6) !important; }
+.st-key-hero [data-testid="stButtonGroup"] { justify-content: center; }
+.st-key-hero button[data-variant] { background: transparent !important; color: #E8ECF0 !important;
+  border: 1px solid rgba(242,242,244,.35) !important; box-shadow: none !important; }
+.st-key-hero button[data-variant] p { color: inherit !important; }
+.st-key-hero button[data-variant="segmented_control"] { border: none !important; border-radius: 0 !important;
+  border-bottom: 2px solid transparent !important; }
+.st-key-hero button[data-variant="segmented_control"] p { letter-spacing: .16em; text-transform: uppercase; font-size: .74rem; }
+.st-key-hero button[data-variant="segmented_control"][aria-checked="true"] { border-bottom-color: #E9C7D6 !important;
+  color: #FFFFFF !important; }
+.st-key-hero button[data-variant="pills"] { border-radius: 999px !important; }
+.st-key-hero button[data-variant]:hover { background: rgba(255,255,255,.12) !important; }
+.st-key-hero [data-testid="stButtonGroup"] div:has(> button) { justify-content: center; }
+.st-key-hero [data-testid="stElementContainer"]:has([data-testid="stButtonGroup"]),
+.st-key-hero [data-testid="stElementContainer"]:has([data-testid="stCheckbox"]),
+.st-key-hero [data-testid="stElementContainer"]:has([data-testid="stRadio"]) { align-self: center; }
+.st-key-hero [data-testid="stPopoverButton"] { background: transparent !important; border: none !important;
+  box-shadow: none !important; }
+.st-key-hero [data-testid="stPopoverButton"] p { letter-spacing: .16em; text-transform: uppercase; font-size: .74rem;
+  color: #E8ECF0 !important; }
+.st-key-hero [data-testid^="stBaseButton-secondary"] { background: rgba(255,255,255,.08) !important;
+  border: 1px solid rgba(242,242,244,.45) !important; color: #F2F2F4 !important; }
+.st-key-hero [data-testid="stFileUploaderDropzone"] { background: rgba(255,255,255,.08); border: 1px dashed rgba(242,242,244,.5); }
+.st-key-hero [data-testid="stFileUploaderDropzone"] span, .st-key-hero small { color: #E8ECF0 !important; }
+.st-key-hero [data-testid="stCheckbox"], .st-key-hero [data-testid="stRadio"] > div { display: flex; justify-content: center; }
+.st-key-hero [data-testid="stElementContainer"]:has([data-testid="stCheckbox"]) { display: flex; justify-content: center; }
+.mv-note { color: #E1E6EC; font-size: .8rem; text-align: center; margin-top: .3rem; }
+[data-testid="stHeader"] button, [data-testid="stHeader"] span, [data-testid="stToolbar"] * { color: #E8ECF0 !important; }
 
 /* exhibition room title */
 .mv-roomtitle { text-align: center; margin: 2.6rem 0 .4rem; font-family: 'Cormorant Garamond', Georgia, serif;
-                font-size: .95rem; letter-spacing: .42em; text-transform: uppercase; color: #51698A; }
-.mv-roomtitle::after { content: ""; display: block; width: 46px; height: 1px; background: #829076; margin: .7rem auto 0; }
+                font-size: 1rem; letter-spacing: .42em; text-transform: uppercase; color: #EDE3E8; }
+.mv-roomtitle::after { content: ""; display: block; width: 46px; height: 1px; background: #C9A44A; margin: .7rem auto 0; }
 
 /* salon hang: rows of differently sized frames, centred like a hung wall */
 .mv-hang { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 3rem 3.4rem;
@@ -126,23 +162,23 @@ h1, h2, h3 { font-family: 'Cormorant Garamond', Georgia, serif !important; font-
 /* museum wall label, printed straight on the wall */
 .mv-label { margin-top: 1.05rem; text-align: center; max-width: 100%; }
 .mv-lt { font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-size: 1.04rem; line-height: 1.15;
-         color: #2F403D; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.mv-lm { font-size: .68rem; color: #5C6B60; margin-top: .2rem; line-height: 1.4; }
+         color: #F4EEF1; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.mv-lm { font-size: .68rem; color: #CDBFC7; margin-top: .2rem; line-height: 1.4; }
 .mv-la { margin-top: .35rem; font-size: .6rem; letter-spacing: .16em; text-transform: uppercase; }
-.mv-la a { color: #553C4B !important; text-decoration: none; margin: 0 .5rem; }
+.mv-la a { color: #C8D3B9 !important; text-decoration: none; margin: 0 .5rem; }
 .mv-la a:hover { text-decoration: underline; }
-.mv-eyebrow { font-size: .6rem; letter-spacing: .22em; text-transform: uppercase; color: #553C4B; margin-bottom: .15rem; }
+.mv-eyebrow { font-size: .6rem; letter-spacing: .22em; text-transform: uppercase; color: #E9C7D6; margin-bottom: .15rem; }
 
 /* featured (selected / uploaded) piece gets its own spotlight */
 .mv-featured { display: flex; justify-content: center; padding: 1.4rem 0 .6rem;
-               background: radial-gradient(ellipse 380px 300px at 50% 45%, rgba(246,246,248,.95), transparent 70%); }
+               background: radial-gradient(ellipse 380px 300px at 50% 45%, rgba(255,214,228,.22), transparent 70%); }
 .mv-featured .mv-piece { --w: 400px; }
-.mv-empty { text-align: center; color: #5C6B60; font-family: 'Cormorant Garamond', Georgia, serif;
+.mv-empty { text-align: center; color: #EDE3E8; font-family: 'Cormorant Garamond', Georgia, serif;
             font-size: 1.4rem; font-style: italic; padding: 3rem 0 2rem; }
 
 /* skirting board and floor across the bottom of the page */
 .mv-baseboard { width: 100vw; margin: 4rem 0 0 calc(50% - 50vw); height: 22px;
-                background: linear-gradient(#EEEEF0, #CFCFD3); border-top: 1px solid #BDBDC2; }
+                background: linear-gradient(#6A4E5E, #3E2A36); border-top: 3px solid #B8913C; }
 .mv-floor { width: 100vw; margin-left: calc(50% - 50vw); height: 90px;
   background: linear-gradient(180deg, rgba(0,0,0,.18), rgba(255,255,255,.06) 40%, rgba(0,0,0,.2)),
     repeating-linear-gradient(90deg, #9A6A3E 0 140px, #7E522B 140px 142px, #A8764A 142px 290px, #7E522B 290px 292px); }
@@ -369,7 +405,8 @@ def why_similar(a_id: int, b_id: int) -> str:
 st.markdown(CSS, unsafe_allow_html=True)
 open_detail = apply_url()
 departments, (n_objects, n_embedded) = facets()
-st.markdown(
+hero = st.container(key="hero")
+hero.markdown(
     f"""<div class="mv-hero">
       <div class="mv-kicker">The open-access collection, rehung by likeness</div>
       <div class="mv-wordmark">Met<em>Vision</em></div>
@@ -378,9 +415,9 @@ st.markdown(
     </div>""", unsafe_allow_html=True)
 
 st.session_state.setdefault("mode", MODES[0])
-_, rail_col, _ = st.columns([1, 6, 1])
-with rail_col, st.container(key="rail"):
-    c_mode, c_filters = st.columns([5, 1], vertical_alignment="center")
+_, rail_col, _ = hero.columns([1, 5, 1])
+with rail_col:
+    _, c_mode, c_filters = st.columns([1, 4, 1], vertical_alignment="center")
     with c_mode:
         mode = st.segmented_control("Search by", MODES, key="mode", label_visibility="collapsed") or MODES[0]
     with c_filters:
@@ -388,7 +425,7 @@ with rail_col, st.container(key="rail"):
 
     if mode == MODES[0]:
         q = st.text_input("Describe what you're looking for", key="query", label_visibility="collapsed",
-                          placeholder="Describe a picture: “Japanese woodblock prints of birds from the 1800s”")
+                          placeholder="Describe a picture you'd like to see…")
         st.pills("Try", EXAMPLES, key="example", on_change=use_example, label_visibility="collapsed")
         use_claude = st.toggle("Let Claude turn the sentence into filters", value=True,
                                help="Claude reads the sentence and fills in culture, classification and "
