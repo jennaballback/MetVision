@@ -147,7 +147,7 @@ h1, h2, h3 { font-family: 'Cormorant Garamond', Georgia, serif !important; font-
              position: relative; }
 
 /* detail dialog */
-[data-testid="stDialog"] img, div[role="dialog"] img { max-height: 62vh !important; width: 100%; object-fit: contain; }
+.mv-detail-img { width: 100%; height: 62vh; background: #F4F2EE center / contain no-repeat; }
 .mv-detail dt { font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; color: #8A8073; margin-top: .6rem; }
 .mv-detail dd { margin: 0; color: #1F1B16; }
 </style>
@@ -305,7 +305,8 @@ def detail(object_id: int):
         return
     left, right = st.columns([3, 2], gap="large")
     with left:
-        st.image(image_data_uri(object_id, a["image_small_url"]), width="stretch")
+        st.markdown(f"<div class='mv-detail-img' style=\"background-image:url('{image_data_uri(object_id, a['image_small_url'])}')\"></div>",
+                    unsafe_allow_html=True)
     with right:
         st.markdown(f"<h2 style='margin-top:0;font-style:italic'>{esc(a['title']) or 'Untitled'}</h2>",
                     unsafe_allow_html=True)
