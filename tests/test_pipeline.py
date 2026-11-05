@@ -8,6 +8,7 @@ from metsearch.embed import FakeEmbedder, embed_pending
 from metsearch.met_api import MetClient
 from metsearch.nl_filter import parse_query, parse_tool_input
 from metsearch.search import Filters, search_by_text, similar_to_object
+from tests.fake_met import FakeMet
 
 DEPTS = [6, 11]
 
@@ -177,3 +178,21 @@ def test_parse_query_with_tool_call():
 def test_parse_query_falls_back(content, stop):
     p = parse_query("cats", ["Asian Art"], client=_FakeAnthropic(content, stop))
     assert p.fallback and p.free_text == "cats" and p.filters.is_empty()
+
+
+def test_smoke_run_leftover_queue_is_trimmed_to_the_cap(conn):
+    fake = FakeMet(per_department=300).start()
+    try:
+        client = client_for(fake)
+        run_id = db.start_run(conn, "full")
+        ingest.load_departments(conn, client)
+        ingest.discover_and_fetch(conn, client, [6], 60, run_id, limit=50)   # like `run --limit 50`
+        queued_by_smoke = count(conn, "SELECT count(*) FROM stg_object_ids")
+        ingest.discover_and_fetch(conn, client, [6], 60, run_id)             # the full run afterwards
+        ingest.transform(conn)
+        n = count(conn, "SELECT count(*) FROM objects")
+        assert 60 <= n <= 66, n
+        # the full run fetched far fewer than the smoke test had queued, plus a top-up at most
+        assert count(conn, "SELECT count(*) FROM stg_object_ids") < queued_by_smoke
+    finally:
+        fake.stop()

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+import math
 import random
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date
@@ -79,18 +80,28 @@ def discover_full(conn: psycopg.Connection, client: MetClient, department_ids: l
         fetched = len(rows) - pending
         usable = conn.execute(USABLE_SQL, (dept,)).fetchone()[0]
         need = cap_per_department - usable
-        if pending or need <= 0:
-            log.info("dept %s: %d usable of %d fetched, %d pending; nothing to queue",
-                     dept, usable, fetched, pending)
-            continue
-        # Size the batch from the share of usable records seen so far (guess 50% at first).
-        rate = max(usable / fetched, 0.05) if fetched >= 50 else 0.5
-        batch = min(int(need / rate) + 1, need * 20)
         order = all_ids[:]
         random.Random(SAMPLE_SEED + dept).shuffle(order)
+        # Usable share seen so far; until there's enough to go on, queue a small probe batch.
+        rate = max(usable / fetched, 0.05) if fetched >= 50 else None
+        if pending:
+            # Leftover queue (e.g. from a --limit smoke test or a crash). Drop what the
+            # cap no longer needs, keeping the earliest IDs in the seeded order.
+            keep = math.ceil(max(need, 0) / rate * 1.05) if rate else pending
+            if pending > keep:
+                position = {oid: n for n, oid in enumerate(order)}
+                queued = sorted((r[0] for r in rows if r[1]), key=lambda oid: position.get(oid, len(order)))
+                conn.execute("DELETE FROM stg_object_ids WHERE object_id = ANY(%s)", (queued[keep:],))
+                conn.commit()
+                log.info("dept %s: %d usable, trimmed queue from %d to %d", dept, usable, pending, keep)
+            continue
+        if need <= 0:
+            log.info("dept %s: %d usable of %d fetched; cap reached", dept, usable, fetched)
+            continue
+        batch = min(need * 2, 200) if rate is None else math.ceil(need / rate * 1.05)
         sample = [i for i in order if i not in known][:batch]
         log.info("dept %s: %d ids, %d usable so far, queueing %d (est. %.0f%% usable)",
-                 dept, len(all_ids), usable, len(sample), 100 * rate)
+                 dept, len(all_ids), usable, len(sample), 100 * (rate or 0.5))
         total += _enqueue(conn, sample, dept, run_id)
         conn.execute(
             """INSERT INTO department_state (department_id, max_seen_object_id) VALUES (%s, %s)
