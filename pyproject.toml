@@ -1,0 +1,9 @@
+[project]
+name = "metvision"
+version = "0.1.0"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+# Lets bare `pytest` import the metsearch package and tests.fake_met from the repo root.
+pythonpath = ["."]
+testpaths = ["tests"]
