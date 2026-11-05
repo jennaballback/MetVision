@@ -39,7 +39,7 @@ class Settings:
     met_api_base: str = field(default_factory=lambda: os.getenv(
         "MET_API_BASE", "https://collectionapi.metmuseum.org/public/collection/v1"))
     # The Met asks for well under 80 req/s. Stay far below that.
-    requests_per_second: float = field(default_factory=lambda: float(os.getenv("MET_RPS", "15")))
+    requests_per_second: float = field(default_factory=lambda: float(os.getenv("MET_RPS", "6")))
     image_requests_per_second: float = field(default_factory=lambda: float(os.getenv("IMAGE_RPS", "5")))
     departments: list[int] = field(default_factory=lambda: _int_list(os.getenv("DEPARTMENTS", "6")))
     # Hard cap on objects per department. Scope is the main risk: keep this small

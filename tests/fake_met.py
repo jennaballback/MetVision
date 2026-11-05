@@ -97,7 +97,8 @@ class FakeMet:
         self.withdrawn: set[int] = set()       # ids that now 404
         self.updated_since: dict[int, str] = {}  # id -> date it was "updated"
         self.requests = 0
-        self.fail_next = 0                      # inject transient 503s
+        self.fail_next = 0                      # inject transient errors...
+        self.fail_status = 503                  # ...with this status
         handler = self._handler()
         self.server = ThreadingHTTPServer(("127.0.0.1", port), handler)
         self.base = f"http://127.0.0.1:{self.server.server_address[1]}"
@@ -146,7 +147,7 @@ class FakeMet:
                 fake.requests += 1
                 if fake.fail_next > 0:
                     fake.fail_next -= 1
-                    return self._json(503, {"message": "try later"})
+                    return self._json(fake.fail_status, {"message": "try later"})
                 u = urlparse(self.path)
                 q = {k: v[0] for k, v in parse_qs(u.query).items()}
                 if u.path == "/v1/departments":

@@ -5,7 +5,7 @@ import pytest
 
 from metsearch import db, evaluate, images, ingest
 from metsearch.embed import FakeEmbedder, embed_pending
-from metsearch.met_api import MetClient
+from metsearch.met_api import MetClient, MetApiError
 from metsearch.nl_filter import parse_query, parse_tool_input
 from metsearch.search import Filters, search_by_text, similar_to_object
 from tests.fake_met import FakeMet
@@ -196,3 +196,17 @@ def test_smoke_run_leftover_queue_is_trimmed_to_the_cap(conn):
         assert count(conn, "SELECT count(*) FROM stg_object_ids") < queued_by_smoke
     finally:
         fake.stop()
+
+
+def test_403_pauses_all_workers_and_slows_down(fake_met):
+    client = MetClient(fake_met.base + "/v1", rate_per_second=8, max_retries=3, block_cooldown=0.05)
+    fake_met.fail_status, fake_met.fail_next = 403, 2
+    oid = next(i for i, o in fake_met.catalog.items() if o["primaryImageSmall"])
+    status, payload = client.get_object(oid)
+    assert status == 200 and payload["objectID"] == oid
+    assert client.limiter.rate == 2                     # halved twice
+    assert client.limiter.paused_until > 0
+
+    fake_met.fail_status, fake_met.fail_next = 403, 10  # a block that outlasts the retries
+    with pytest.raises(MetApiError, match="403"):
+        client.get_object(oid)

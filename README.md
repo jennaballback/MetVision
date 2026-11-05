@@ -32,7 +32,7 @@ Met API ──► stg_object_ids ──► stg_objects_raw (JSONB) ──SQL─�
 | Step | Code | Notes |
 |---|---|---|
 | Discover | `metsearch/ingest.py: discover_and_fetch` | Department ID list in a seeded random order, queued in rounds sized from the share of usable records seen so far, until each department has about `MAX_OBJECTS_PER_DEPT` public-domain objects with images. Re-running is idempotent. |
-| Fetch | `ingest.fetch_metadata` | Token-bucket rate limiter (default 15 req/s; the Met allows < 80), exponential backoff on 403/429/5xx, raw JSON into staging. The cursor is `stg_object_ids.needs_fetch`, flipped in the same transaction that stores the response, so a crash loses at most one batch. |
+| Fetch | `ingest.fetch_metadata` | Token-bucket rate limiter (default 6 req/s). When the Met answers 403/429 (its "too fast" signal), every worker pauses (30s, doubling, up to 5 min) and the rate halves; 5xx errors get short exponential backoff, raw JSON into staging. The cursor is `stg_object_ids.needs_fetch`, flipped in the same transaction that stores the response, so a crash loses at most one batch. |
 | Transform | `sql/transform.sql` | Staging → core with idempotent upserts in one transaction. Only public-domain objects with an image are promoted. Withdrawn objects (404) are deleted. |
 | Images | `metsearch/images.py` | `primaryImageSmall`, resized to ≤512px, cached on disk, skipped if present, 5 req/s. |
 | Embed | `metsearch/embed.py` | open_clip ViT-B/32 on CPU. One image vector and one text vector per object (title, object name, culture, period, classification, medium, artist, tags). |

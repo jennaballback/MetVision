@@ -178,7 +178,7 @@ def _batched(it, n):
 
 
 def fetch_metadata(conn: psycopg.Connection, client: MetClient, run_id: int,
-                   workers: int = 8, batch_size: int = 200, limit: int | None = None) -> int:
+                   workers: int = 4, batch_size: int = 200, limit: int | None = None) -> int:
     """Fetch every queued object into stg_objects_raw.
 
     Resumable: the cursor is `stg_object_ids.needs_fetch`, flipped to FALSE in the
