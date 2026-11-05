@@ -34,90 +34,127 @@ CSS = """
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500&display=swap');
 html, body, [class*="css"], .stMarkdown, .stCaption, button, input { font-family: 'Inter', sans-serif; }
 h1, h2, h3 { font-family: 'Cormorant Garamond', Georgia, serif !important; font-weight: 600; }
-.block-container { padding-top: 4.5rem; max-width: 1500px; }
 [data-testid="stHeader"] { background: transparent; }
+[data-testid="stSidebarCollapsedControl"] { display: none; }
 
-/* ---------- header ---------- */
-.mv-hero { text-align: center; padding-bottom: 1.4rem; }
-.mv-kicker { font-size: .72rem; letter-spacing: .32em; text-transform: uppercase; color: #8C2F39; }
-.mv-wordmark { font-family: 'Cormorant Garamond', Georgia, serif !important; font-size: 4.6rem !important;
-               font-weight: 600; line-height: 1; color: #1F1B16; margin: .3rem 0 .2rem; }
+/* ---------- the whole page is the gallery wall ---------- */
+.stApp {
+  background:
+    radial-gradient(ellipse 30% 420px at 18% 0, rgba(255,250,235,.85), transparent 75%),
+    radial-gradient(ellipse 30% 420px at 50% 0, rgba(255,250,235,.85), transparent 75%),
+    radial-gradient(ellipse 30% 420px at 82% 0, rgba(255,250,235,.85), transparent 75%),
+    linear-gradient(180deg, #E9E8E5 0%, #E2E1DE 60%, #D9D7D3 100%);
+  background-attachment: fixed;
+}
+.block-container { padding-top: 3.2rem; padding-bottom: 0; max-width: 1480px; }
+
+/* header, lettered on the wall like an exhibition title */
+.mv-hero { text-align: center; padding-bottom: 1rem; }
+.mv-kicker { font-size: .7rem; letter-spacing: .34em; text-transform: uppercase; color: #8C2F39; }
+.mv-wordmark { font-family: 'Cormorant Garamond', Georgia, serif !important; font-size: 4.8rem !important;
+               font-weight: 600; line-height: 1; color: #2A2622; margin: .35rem 0 .25rem;
+               text-shadow: 0 1px 0 rgba(255,255,255,.7); }
 .mv-wordmark em { color: #8C2F39; font-style: italic; font-weight: 500; }
-.mv-tagline { font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-size: 1.35rem;
-              color: #5E554A; }
-.mv-stats { color: #8A8073; font-size: .74rem; letter-spacing: .06em; margin-top: .5rem; }
+.mv-tagline { font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-size: 1.3rem; color: #5E574E; }
+.mv-stats { color: #8A8378; font-size: .7rem; letter-spacing: .08em; margin-top: .45rem; }
 
-/* ---------- the gallery room ---------- */
-.mv-room { position: relative; margin: 1.4rem -1rem 0; border-radius: 4px; overflow: hidden;
-           box-shadow: 0 20px 40px rgba(40,30,20,.18); }
-.mv-wall { padding: 3.2rem 3rem 2.2rem;
+/* the control rail at the top: search mode, query, filters */
+.st-key-rail { background: rgba(255,255,255,.55); border: 1px solid rgba(120,100,60,.18); border-radius: 6px;
+               padding: .8rem 1rem .4rem; backdrop-filter: blur(4px); box-shadow: 0 2px 10px rgba(60,50,40,.06); }
+.mv-note { color: #6B645A; font-size: .8rem; text-align: center; margin-top: .3rem; }
+
+/* exhibition room title */
+.mv-roomtitle { text-align: center; margin: 2.6rem 0 .4rem; font-family: 'Cormorant Garamond', Georgia, serif;
+                font-size: .95rem; letter-spacing: .42em; text-transform: uppercase; color: #4A443C; }
+.mv-roomtitle::after { content: ""; display: block; width: 46px; height: 1px; background: #B0A48C; margin: .7rem auto 0; }
+
+/* salon hang: rows of differently sized frames, centred like a hung wall */
+.mv-hang { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 3rem 3.4rem;
+           padding: 2.2rem 0 1rem; }
+.mv-piece { display: flex; flex-direction: column; align-items: center; width: var(--w, 260px); max-width: 42vw; }
+@media (max-width: 760px) { .mv-hang { gap: 2rem 1.2rem; } .mv-wordmark { font-size: 3.2rem !important; } }
+
+/* ---------- ornate gilt frames ---------- */
+.mv-frame { --fw: 24px; --slip: 10px; position: relative; display: block; width: 100%; padding: var(--fw);
   background:
-    radial-gradient(ellipse 22% 55% at 15% 0%, rgba(255,236,200,.38), transparent 70%),
-    radial-gradient(ellipse 22% 55% at 50% 0%, rgba(255,236,200,.38), transparent 70%),
-    radial-gradient(ellipse 22% 55% at 85% 0%, rgba(255,236,200,.38), transparent 70%),
-    linear-gradient(180deg, #6E8196 0%, #7D90A4 55%, #74879B 100%);
-  border-top: 16px solid #EDE8DF; box-shadow: inset 0 10px 14px -8px rgba(0,0,0,.35); }
-.mv-baseboard { height: 16px; background: linear-gradient(#59636E, #46505A); }
-.mv-floor { height: 70px;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.12), rgba(0,0,0,.25)),
-    repeating-linear-gradient(90deg, #8E5A2E 0 118px, #7A4A22 118px 120px, #9A6436 120px 240px, #7A4A22 240px 242px); }
-.mv-roomtitle { position: absolute; top: 26px; left: 0; right: 0; text-align: center;
-  font-family: 'Cormorant Garamond', Georgia, serif; font-size: .82rem; letter-spacing: .4em;
-  text-transform: uppercase; color: rgba(255,255,255,.75); }
+    radial-gradient(circle at 13px 13px, #FFF0B8 0 3px, #8A6420 4px 6px, transparent 7px),
+    radial-gradient(circle at calc(100% - 13px) 13px, #FFF0B8 0 3px, #8A6420 4px 6px, transparent 7px),
+    radial-gradient(circle at 13px calc(100% - 13px), #FFF0B8 0 3px, #8A6420 4px 6px, transparent 7px),
+    radial-gradient(circle at calc(100% - 13px) calc(100% - 13px), #FFF0B8 0 3px, #8A6420 4px 6px, transparent 7px),
+    repeating-linear-gradient(45deg, rgba(255,244,200,.20) 0 2px, transparent 2px 5px),
+    repeating-linear-gradient(-45deg, rgba(90,60,10,.14) 0 1px, transparent 1px 6px),
+    linear-gradient(135deg, #7A5A1C 0%, #E8C96A 17%, #B08530 33%, #F7E09A 50%, #A57A27 67%, #E6C567 83%, #6C4E15 100%);
+  box-shadow:
+    inset 0 0 0 1px #4A3510, inset 0 0 0 4px #DDBE62, inset 0 0 0 5px #6B4D16,
+    inset 0 0 calc(var(--fw) * .7) rgba(70,45,5,.5),
+    0 18px 26px rgba(45,38,30,.32), 0 4px 7px rgba(45,38,30,.22);
+  transition: transform .2s ease, box-shadow .2s ease; }
+.mv-frame:hover { transform: translateY(-3px);
+  box-shadow: inset 0 0 0 1px #4A3510, inset 0 0 0 4px #DDBE62, inset 0 0 0 5px #6B4D16,
+    inset 0 0 calc(var(--fw) * .7) rgba(70,45,5,.5), 0 26px 36px rgba(45,38,30,.36), 0 6px 10px rgba(45,38,30,.22); }
+/* bead-and-reel moulding just inside the outer edge */
+.mv-frame::before { content: ""; position: absolute; inset: 7px; border: 3px dotted rgba(255,238,178,.85);
+                    pointer-events: none; }
+/* bevelled inner lip where the frame meets the liner */
+.mv-frame::after { content: ""; position: absolute; inset: calc(var(--fw) - 4px); border: 4px solid;
+                   border-color: #5E4312 #F4DC8E #F4DC8E #5E4312; pointer-events: none; }
+/* flat gilt liner (slip) around the picture */
+.mv-mat { display: block; padding: var(--slip);
+          background: linear-gradient(135deg, #D2B464, #EEDA9C 45%, #C6A452);
+          box-shadow: inset 1px 1px 3px rgba(80,55,10,.6); }
+.mv-frame img { display: block; width: 100%; height: auto; object-fit: cover; max-width: none; border: 1px solid rgba(50,35,5,.55); }
+/* little brass title plaque on the bottom rail */
+.mv-plaque { position: absolute; left: 50%; bottom: calc(var(--fw) / 2 - 5px); transform: translateX(-50%);
+             width: 38px; height: 10px; border-radius: 1px; z-index: 1;
+             background: linear-gradient(180deg, #F3E2A6, #B99446); box-shadow: 0 1px 2px rgba(0,0,0,.4); }
+/* variations, so the wall doesn't look like one frame repeated */
+.f-wide  { --fw: 32px; --slip: 14px; }
+.f-slim  { --fw: 16px; --slip: 0px; }
+.f-slim::before { inset: 4px; border-width: 2px; }
+.f-antique { background:
+    radial-gradient(circle at 13px 13px, #F1DC98 0 3px, #5E4312 4px 6px, transparent 7px),
+    radial-gradient(circle at calc(100% - 13px) 13px, #F1DC98 0 3px, #5E4312 4px 6px, transparent 7px),
+    radial-gradient(circle at 13px calc(100% - 13px), #F1DC98 0 3px, #5E4312 4px 6px, transparent 7px),
+    radial-gradient(circle at calc(100% - 13px) calc(100% - 13px), #F1DC98 0 3px, #5E4312 4px 6px, transparent 7px),
+    repeating-linear-gradient(45deg, rgba(255,240,190,.16) 0 2px, transparent 2px 5px),
+    linear-gradient(135deg, #5C4214 0%, #C9A44E 20%, #8A6A28 40%, #DCC07A 55%, #7E5E20 75%, #B8923F 90%, #4E370E 100%); }
+.f-selected { }
 
-/* salon hang: masonry columns, frames of varying size */
-.mv-hang { column-count: 4; column-gap: 3rem; }
-@media (max-width: 1100px) { .mv-hang { column-count: 3; } }
-@media (max-width: 760px)  { .mv-hang { column-count: 2; column-gap: 1.6rem; } .mv-wall { padding: 2.4rem 1.2rem 1.6rem; } }
-.mv-piece { break-inside: avoid; display: flex; flex-direction: column; align-items: center;
-            margin: 0 auto 2.6rem; }
-.mv-frame { position: relative; display: block; box-shadow: 0 14px 22px rgba(10,15,25,.45), 0 3px 6px rgba(10,15,25,.3);
-            transition: transform .18s ease, box-shadow .18s ease; }
-.mv-frame:hover { transform: translateY(-3px) scale(1.015);
-                  box-shadow: 0 22px 32px rgba(10,15,25,.5), 0 4px 8px rgba(10,15,25,.3); }
-.mv-frame img { display: block; width: 100%; height: auto; }
-.mv-mat { background: #F4EFE4; box-shadow: inset 0 0 0 1px rgba(0,0,0,.12), inset 2px 3px 6px rgba(0,0,0,.18); }
-/* frame styles */
-.f-gold   { padding: 15px; background: linear-gradient(135deg, #8A6A26, #E9CF7A 22%, #A8822F 45%, #F3DD8E 62%, #8C6B25 85%, #C9A44A);
-            border-radius: 2px; }
-.f-gold .mv-mat { padding: 18px; }
-.f-gold::after { content: ""; position: absolute; inset: 6px; border: 2px solid rgba(90,64,18,.55); pointer-events: none; }
-.f-walnut { padding: 13px; background: linear-gradient(135deg, #3B2414, #6B4426 40%, #4A2D18 70%, #2E1B0E); }
-.f-walnut .mv-mat { padding: 0; }
-.f-black  { padding: 7px; background: #141414; }
-.f-black .mv-mat { padding: 30px; background: #FBFAF7; }
-.f-silver { padding: 11px; background: linear-gradient(135deg, #8E9296, #E3E6E8 35%, #A2A7AB 60%, #D4D7DA); }
-.f-silver .mv-mat { padding: 14px; }
-.f-selected { outline: 3px solid rgba(255,236,200,.9); outline-offset: 10px; }
-
-/* museum wall label */
-.mv-label-card { margin-top: 1.1rem; background: #FBF9F4; padding: .55rem .75rem .5rem; width: 82%;
-                 max-width: 230px; box-shadow: 0 2px 5px rgba(10,15,25,.3); }
-.mv-lt { font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-size: 1.02rem; line-height: 1.15;
-         color: #1F1B16; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.mv-lm { font-size: .68rem; color: #5E554A; margin-top: .2rem; line-height: 1.35; }
-.mv-la { margin-top: .35rem; font-size: .62rem; letter-spacing: .14em; text-transform: uppercase; }
-.mv-la a { color: #8C2F39 !important; text-decoration: none; margin-right: .9rem; }
+/* museum wall label, printed straight on the wall */
+.mv-label { margin-top: 1.05rem; text-align: center; max-width: 100%; }
+.mv-lt { font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-size: 1.04rem; line-height: 1.15;
+         color: #2A2622; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.mv-lm { font-size: .68rem; color: #6B645A; margin-top: .2rem; line-height: 1.4; }
+.mv-la { margin-top: .35rem; font-size: .6rem; letter-spacing: .16em; text-transform: uppercase; }
+.mv-la a { color: #8C2F39 !important; text-decoration: none; margin: 0 .5rem; }
 .mv-la a:hover { text-decoration: underline; }
+.mv-eyebrow { font-size: .6rem; letter-spacing: .22em; text-transform: uppercase; color: #8C2F39; margin-bottom: .15rem; }
 
-/* featured (selected / uploaded) piece */
-.mv-featured { display: flex; justify-content: center; margin: .4rem 0 3rem; }
-.mv-featured .mv-frame { width: min(380px, 70%); }
-.mv-eyebrow { font-size: .62rem; letter-spacing: .2em; text-transform: uppercase; color: #8C2F39; }
-.mv-empty { text-align: center; color: rgba(255,255,255,.85); font-family: 'Cormorant Garamond', Georgia, serif;
+/* featured (selected / uploaded) piece gets its own spotlight */
+.mv-featured { display: flex; justify-content: center; padding: 1.4rem 0 .6rem;
+               background: radial-gradient(ellipse 380px 300px at 50% 45%, rgba(255,250,232,.95), transparent 70%); }
+.mv-featured .mv-piece { --w: 400px; }
+.mv-empty { text-align: center; color: #6B645A; font-family: 'Cormorant Garamond', Georgia, serif;
             font-size: 1.4rem; font-style: italic; padding: 3rem 0 2rem; }
+
+/* skirting board and floor across the bottom of the page */
+.mv-baseboard { width: 100vw; margin: 4rem 0 0 calc(50% - 50vw); height: 22px;
+                background: linear-gradient(#F7F6F3, #DCDAD5); border-top: 1px solid #C9C6BF; }
+.mv-floor { width: 100vw; margin-left: calc(50% - 50vw); height: 90px;
+  background: linear-gradient(180deg, rgba(0,0,0,.18), rgba(255,255,255,.06) 40%, rgba(0,0,0,.2)),
+    repeating-linear-gradient(90deg, #9A6A3E 0 140px, #7E522B 140px 142px, #A8764A 142px 290px, #7E522B 290px 292px); }
+.mv-footer { color: #E9DCC8; font-size: .72rem; text-align: center; margin-top: -58px; padding-bottom: 30px;
+             position: relative; }
 
 /* detail dialog */
 [data-testid="stDialog"] img, div[role="dialog"] img { max-height: 62vh !important; width: 100%; object-fit: contain; }
 .mv-detail dt { font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; color: #8A8073; margin-top: .6rem; }
 .mv-detail dd { margin: 0; color: #1F1B16; }
-.mv-footer { color: #8A8073; font-size: .75rem; text-align: center; margin-top: 2rem; }
 </style>
 """
 
-FRAMES = ["f-gold", "f-walnut", "f-gold", "f-black", "f-silver", "f-gold", "f-walnut"]
-WIDTHS = [100, 82, 92, 74, 88, 96, 80]   # % of column width: the salon hang's varied sizes
+FRAMES = ["", "f-wide", "f-antique", "f-slim", "f-wide f-antique", "", "f-slim f-antique"]
+WIDTHS = [210, 260, 180, 240, 290, 200, 250]   # px: the salon hang's varied sizes
 
 
 # ---------------------------------------------------------------- data access
@@ -221,10 +258,11 @@ def esc(v) -> str:
     return html.escape(str(v)) if v not in (None, "") else ""
 
 
-def framed(src: str, frame: str, width: int, link: str | None, extra: str = "") -> str:
+def framed(src: str, frame: str, link: str | None, extra: str = "") -> str:
     tag, attrs = ("a", f"href='{link}' target='_self'") if link else ("span", "")
-    return (f"<{tag} {attrs} class='mv-frame {frame} {extra}' style='width:{width}%'>"
-            f"<span class='mv-mat' style='display:block'><img src='{src}' alt='' loading='lazy'></span></{tag}>")
+    return (f"<{tag} {attrs} class='mv-frame {frame} {extra}'>"
+            f"<span class='mv-mat'><img src='{src}' alt='' loading='lazy'></span>"
+            f"<span class='mv-plaque'></span></{tag}>")
 
 
 def wall_label(r: dict, actions: bool = True, eyebrow: str = "") -> str:
@@ -236,29 +274,27 @@ def wall_label(r: dict, actions: bool = True, eyebrow: str = "") -> str:
         acts = (f"<div class='mv-la'><a href='{href(m=1, pick=r['object_id'])}' target='_self'>Similar</a>"
                 f"<a href='{href(detail=r['object_id'])}' target='_self'>Details</a></div>")
     eb = f"<div class='mv-eyebrow'>{eyebrow}</div>" if eyebrow else ""
-    return (f"<div class='mv-label-card'>{eb}<div class='mv-lt'>{esc(r.get('title')) or 'Untitled'}</div>"
+    return (f"<div class='mv-label'>{eb}<div class='mv-lt'>{esc(r.get('title')) or 'Untitled'}</div>"
             f"<div class='mv-lm'>{meta}</div>{acts}</div>")
 
 
 def gallery_wall(results: list[dict], room: str, featured_html: str = "", empty: str = ""):
+    """Hang results straight on the page: the whole page is the wall."""
     pieces = []
     for r in results:
         oid = r["object_id"]
         frame, width = FRAMES[oid % len(FRAMES)], WIDTHS[(oid // 7) % len(WIDTHS)]
         src = image_data_uri(oid, r["image_small_url"])
-        pieces.append(f"<div class='mv-piece'>{framed(src, frame, width, href(detail=oid))}{wall_label(r)}</div>")
+        pieces.append(f"<div class='mv-piece' style='--w:{width}px'>"
+                      f"{framed(src, frame, href(detail=oid))}{wall_label(r)}</div>")
     body = (f"<div class='mv-hang'>{''.join(pieces)}</div>" if pieces
             else f"<div class='mv-empty'>{empty or 'Nothing on this wall yet.'}</div>")
-    st.markdown(
-        f"<div class='mv-room'><div class='mv-roomtitle'>{esc(room)}</div>"
-        f"<div class='mv-wall'>{featured_html}{body}</div>"
-        "<div class='mv-baseboard'></div><div class='mv-floor'></div></div>",
-        unsafe_allow_html=True)
+    st.markdown(f"{featured_html}<div class='mv-roomtitle'>{esc(room)}</div>{body}", unsafe_allow_html=True)
 
 
 def featured(src: str, label_html: str) -> str:
-    return (f"<div class='mv-featured'><div class='mv-piece' style='margin:0'>"
-            f"{framed(src, 'f-gold', 100, None, 'f-selected')}{label_html}</div></div>")
+    return (f"<div class='mv-featured'><div class='mv-piece'>"
+            f"{framed(src, 'f-wide', None, 'f-selected')}{label_html}</div></div>")
 
 
 @st.dialog("On view", width="large")
@@ -286,18 +322,20 @@ def detail(object_id: int):
             st.rerun()
 
 
-def sidebar_filters(departments: list[str]) -> Filters:
-    with st.sidebar:
-        st.markdown("<h3 style='margin-bottom:0'>Filters</h3>", unsafe_allow_html=True)
+def filter_menu(departments: list[str]) -> Filters:
+    """Filters live in a drop-down at the top of the page, so the wall gets the full width."""
+    ss = st.session_state
+    active = sum(bool(ss.get(k)) for k in ("f_dept", "f_cult", "f_class", "f_date"))
+    with st.popover(f"Filters · {active}" if active else "Filters", width="stretch"):
         st.caption("Applied to every search.")
         f = Filters(
-            departments=st.multiselect("Department", departments),
-            cultures=[c.strip() for c in st.text_input("Culture", placeholder="e.g. Japan, French").split(",")
-                      if c.strip()],
-            classifications=[c.strip() for c in st.text_input("Classification", placeholder="e.g. Prints")
-                             .split(",") if c.strip()],
+            departments=st.multiselect("Department", departments, key="f_dept"),
+            cultures=[c.strip() for c in st.text_input("Culture", placeholder="e.g. Japan, French",
+                                                       key="f_cult").split(",") if c.strip()],
+            classifications=[c.strip() for c in st.text_input("Classification", placeholder="e.g. Prints",
+                                                              key="f_class").split(",") if c.strip()],
         )
-        if st.toggle("Limit by date"):
+        if st.toggle("Limit by date", key="f_date"):
             y0, y1 = st.slider("Years (negative = BCE)", -3000, 2000, (1600, 1900), step=50)
             f.year_from, f.year_to = y0, y1
     return f
@@ -334,22 +372,46 @@ st.markdown(
       <div class="mv-tagline">Describe a picture, choose a work, or bring a photo. We'll hang its closest relatives.</div>
       <div class="mv-stats">{n_embedded:,} WORKS ON VIEW · CLIP EMBEDDINGS · PGVECTOR · CLAUDE-PARSED FILTERS</div>
     </div>""", unsafe_allow_html=True)
-filters = sidebar_filters(departments)
 
 st.session_state.setdefault("mode", MODES[0])
-_, mid, _ = st.columns([1, 2, 1])
-with mid:
-    mode = st.segmented_control("Search by", MODES, key="mode", label_visibility="collapsed") or MODES[0]
+_, rail_col, _ = st.columns([1, 6, 1])
+with rail_col, st.container(key="rail"):
+    c_mode, c_filters = st.columns([5, 1], vertical_alignment="center")
+    with c_mode:
+        mode = st.segmented_control("Search by", MODES, key="mode", label_visibility="collapsed") or MODES[0]
+    with c_filters:
+        filters = filter_menu(departments)
 
-if mode == MODES[0]:
-    _, mid, _ = st.columns([1, 4, 1])
-    with mid:
+    if mode == MODES[0]:
         q = st.text_input("Describe what you're looking for", key="query", label_visibility="collapsed",
                           placeholder="Describe a picture: “Japanese woodblock prints of birds from the 1800s”")
         st.pills("Try", EXAMPLES, key="example", on_change=use_example, label_visibility="collapsed")
         use_claude = st.toggle("Let Claude turn the sentence into filters", value=True,
-                               help="Claude reads the sentence and fills in culture, classification and dates. "
-                                    "The ranking itself is pure vector search.")
+                               help="Claude reads the sentence and fills in culture, classification and "
+                                    "dates. The ranking itself is pure vector search.")
+    elif mode == MODES[1]:
+        c1, c2 = st.columns([4, 1], vertical_alignment="bottom")
+        title_q = c1.text_input("Find an artwork by title", placeholder="Type part of a title",
+                                label_visibility="collapsed")
+        if c2.button("Surprise me", width="stretch"):
+            st.session_state["picked"] = conn().execute(
+                "SELECT object_id FROM object_embeddings ORDER BY random() LIMIT 1").fetchone()[0]
+        if title_q:
+            opts = conn().execute("SELECT o.object_id, o.title FROM objects o JOIN object_embeddings USING (object_id) "
+                                  "WHERE o.title ILIKE %s ORDER BY o.title LIMIT 50", (f"%{title_q}%",)).fetchall()
+            if opts:
+                c3, c4 = st.columns([4, 1], vertical_alignment="bottom")
+                choice = c3.selectbox("Matches", opts, format_func=lambda r: f"{r[1]} ({r[0]})")
+                c4.button("Hang this one", on_click=pick, args=(choice[0],), width="stretch")
+            else:
+                st.caption("No titles match.")
+        sim_mode = st.radio("Similarity", ["Visual", "Visual + description"], horizontal=True,
+                            help="Visual: image embeddings only. Visual + description: also fuses "
+                                 "title, medium and tags, ranked together.")
+    else:
+        up = st.file_uploader("Bring a photo of anything", type=["jpg", "jpeg", "png", "webp"])
+
+if mode == MODES[0]:
     if q:
         text, f = q, filters
         note = ""
@@ -365,31 +427,12 @@ if mode == MODES[0]:
                 if applied:
                     note = "Filters from Claude → " + " · ".join(applied) + (f" · looking for “{text}”" if text else "")
         if note:
-            _, mid, _ = st.columns([1, 4, 1])
-            mid.caption(note)
+            st.markdown(f"<div class='mv-note'>{esc(note)}</div>", unsafe_allow_html=True)
         gallery_wall(search_by_text(conn(), text, embedder(), k=10, filters=f), f"“{q}”")
     else:
         gallery_wall(todays_hang(), "On view today")
 
 elif mode == MODES[1]:
-    _, mid, _ = st.columns([1, 4, 1])
-    with mid:
-        c1, c2 = st.columns([4, 1], vertical_alignment="bottom")
-        title_q = c1.text_input("Find an artwork by title", placeholder="Type part of a title")
-        if c2.button("Surprise me", width="stretch"):
-            st.session_state["picked"] = conn().execute(
-                "SELECT object_id FROM object_embeddings ORDER BY random() LIMIT 1").fetchone()[0]
-        if title_q:
-            opts = conn().execute("SELECT o.object_id, o.title FROM objects o JOIN object_embeddings USING (object_id) "
-                                  "WHERE o.title ILIKE %s ORDER BY o.title LIMIT 50", (f"%{title_q}%",)).fetchall()
-            if opts:
-                choice = st.selectbox("Matches", opts, format_func=lambda r: f"{r[1]} ({r[0]})")
-                st.button("Hang this one", on_click=pick, args=(choice[0],))
-            else:
-                st.caption("No titles match.")
-        sim_mode = st.radio("Similarity", ["Visual", "Visual + description"], horizontal=True,
-                            help="Visual: image embeddings only. Visual + description: also fuses "
-                                 "title, medium and tags, ranked together.")
     picked = st.session_state.get("picked")
     a = artwork(picked) if picked else None
     if not a:
@@ -399,7 +442,6 @@ elif mode == MODES[1]:
                                     mode="image" if sim_mode == "Visual" else "hybrid")
         feat = featured(image_data_uri(picked, a["image_small_url"]), wall_label(a, eyebrow="Selected work"))
         gallery_wall(results, "Kindred works", featured_html=feat)
-        st.write("")
         _, mid, _ = st.columns([1, 2, 1])
         with mid:
             if results and st.button("Why is the closest match similar?", width="stretch",
@@ -410,9 +452,6 @@ elif mode == MODES[1]:
                     st.caption(f"Claude isn't available: {exc}")
 
 else:
-    _, mid, _ = st.columns([1, 2, 1])
-    with mid:
-        up = st.file_uploader("Bring a photo of anything", type=["jpg", "jpeg", "png", "webp"])
     if up:
         img = Image.open(up).convert("RGB")
         thumb = img.copy()
@@ -421,7 +460,7 @@ else:
         thumb.save(buf, "JPEG", quality=85)
         src = "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode()
         vec = embedder().embed_images([img])[0]
-        label = ("<div class='mv-label-card'><div class='mv-eyebrow'>Your photo</div>"
+        label = ("<div class='mv-label'><div class='mv-eyebrow'>Your photo</div>"
                  f"<div class='mv-lt'>{esc(up.name)}</div></div>")
         gallery_wall(search_by_image(conn(), vec, k=10, filters=filters), "Kindred works",
                      featured_html=featured(src, label))
@@ -432,6 +471,7 @@ if open_detail:
     detail(open_detail)
 
 st.markdown(
+    "<div class='mv-baseboard'></div><div class='mv-floor'></div>"
     "<div class='mv-footer'>Images and data: The Metropolitan Museum of Art Open Access (CC0). "
     "MetVision is an independent portfolio project, not affiliated with the museum.</div>",
     unsafe_allow_html=True)
