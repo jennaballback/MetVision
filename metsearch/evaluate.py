@@ -143,6 +143,6 @@ def write_report(result: dict, out_dir: Path) -> tuple[Path, Path]:
     out_dir.mkdir(parents=True, exist_ok=True)
     stem = "results_" + result["embedding"].replace("_embedding", "")
     jp, mp = out_dir / f"{stem}.json", out_dir / f"{stem}.md"
-    jp.write_text(json.dumps(result, indent=2, default=str))
-    mp.write_text(to_markdown(result))
+    jp.write_text(json.dumps(result, indent=2, default=str), encoding="utf-8")
+    mp.write_text(to_markdown(result), encoding="utf-8")
     return jp, mp

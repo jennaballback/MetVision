@@ -9,10 +9,20 @@ Postgres, CLIP image and text embeddings in pgvector, hybrid retrieval, a Claude
 natural-language filter parser, a weekly incremental job, and an evaluation against curator
 metadata.
 
-> **Results:** _fill in after the first real run_ — e.g. "On 500 query objects, N% of the
-> 10 nearest neighbours share the query's classification vs M% for random objects."
-> See `eval/results_image.md`. (`eval/sample_results_fixture.md` is from synthetic test data
-> and only shows the report format.)
+> **Results** (first real run, 5 Nov 2026: 7,070 public-domain works from Asian Art, Drawings and
+> Prints, and European Paintings; 500 query objects, 10 nearest neighbours by CLIP image embedding):
+>
+> | Neighbour shares the query's… | MetVision | Random 10 | Lift |
+> |---|---|---|---|
+> | classification | 72.8% | 9.2% | 7.9x |
+> | period | 32.8% | 7.4% | 4.4x |
+> | culture | 64.7% | 23.3% | 2.8x |
+> | department | 97.1% | 56.3% | 1.7x |
+>
+> CLIP never sees the curators' labels, yet a work's visual neighbours share its classification
+> 7.9x more often than chance. Department lift is low only because Asian Art is most of the pool.
+> Full report: run `python -m metsearch eval --n 500` (writes `eval/results_image.md`).
+> (`eval/sample_results_fixture.md` is from synthetic test data and only shows the report format.)
 
 ## Architecture
 

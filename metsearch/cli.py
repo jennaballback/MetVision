@@ -115,6 +115,10 @@ def cmd_stats(args, s, conn):
 
 
 def main(argv=None):
+    # Artwork titles carry non-ASCII (ō, é, 漢字); don't let a Windows code page crash a print.
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(errors="replace")
     p = argparse.ArgumentParser(prog="metsearch")
     p.add_argument("-v", "--verbose", action="store_true")
     sub = p.add_subparsers(dest="cmd", required=True)

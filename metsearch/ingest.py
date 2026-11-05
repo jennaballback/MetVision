@@ -212,7 +212,7 @@ def transform(conn: psycopg.Connection) -> dict:
     """Staging -> core tables in a single transaction."""
     conn.commit()  # so the block below is a real transaction, not a savepoint
     with conn.transaction():
-        conn.execute((SQL_DIR / "transform.sql").read_text())
+        conn.execute((SQL_DIR / "transform.sql").read_text(encoding="utf-8"))
     counts = conn.execute(
         """SELECT (SELECT count(*) FROM stg_objects_raw),
                   (SELECT count(*) FROM objects),
