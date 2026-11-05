@@ -60,7 +60,7 @@ h1, h2, h3 { font-family: 'Cormorant Garamond', Georgia, serif !important; font-
 .mv-wordmark { font-family: 'Cormorant Garamond', Georgia, serif !important; font-size: 5.4rem !important;
                font-weight: 600; line-height: 1; color: #F7F7F8; margin: .35rem 0 .25rem;
                text-shadow: 0 2px 16px rgba(47,64,61,.35); }
-.mv-wordmark em { color: #553C4B; text-shadow: none; font-style: italic; font-weight: 500; }
+.mv-wordmark em { color: #425854; text-shadow: none; font-style: italic; font-weight: 500; }
 .mv-tagline { font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-size: 1.35rem; color: #2F403D; }
 .mv-stats { color: #425854; font-size: .68rem; letter-spacing: .1em; margin-top: .5rem; }
 /* widgets on the banner: light text, no boxes */
@@ -72,7 +72,7 @@ h1, h2, h3 { font-family: 'Cormorant Garamond', Georgia, serif !important; font-
 .st-key-hero [data-testid="stTextInputRootElement"] { border-bottom: 1.5px solid #425854 !important; }
 .st-key-hero input { background: transparent !important; color: #1F2D2A !important; text-align: center;
   font-family: 'Cormorant Garamond', Georgia, serif !important; font-size: 1.6rem !important; font-style: italic;
-  caret-color: #553C4B; padding: .4rem 0 !important; }
+  caret-color: #425854; padding: .4rem 0 !important; }
 .st-key-hero input::placeholder { color: rgba(47,64,61,.6) !important; }
 .st-key-hero [data-testid="stButtonGroup"] { justify-content: center; }
 .st-key-hero button[data-variant] { background: transparent !important; color: #2F403D !important;
@@ -81,7 +81,7 @@ h1, h2, h3 { font-family: 'Cormorant Garamond', Georgia, serif !important; font-
 .st-key-hero button[data-variant="segmented_control"] { border: none !important; border-radius: 0 !important;
   border-bottom: 2px solid transparent !important; }
 .st-key-hero button[data-variant="segmented_control"] p { letter-spacing: .16em; text-transform: uppercase; font-size: .74rem; }
-.st-key-hero button[data-variant="segmented_control"][aria-checked="true"] { border-bottom-color: #553C4B !important;
+.st-key-hero button[data-variant="segmented_control"][aria-checked="true"] { border-bottom-color: #425854 !important;
   color: #1F2D2A !important; font-weight: 600; }
 .st-key-hero button[data-variant="pills"] { border-radius: 999px !important; }
 .st-key-hero button[data-variant]:hover { background: rgba(255,255,255,.22) !important; }
