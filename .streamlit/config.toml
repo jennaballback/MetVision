@@ -1,9 +1,10 @@
 [theme]
+# Palette: Rosebud #553C4B, Deep Water #51698A, Glare #D7D7D9, Rose Leaf #425854, Lily Leaf #829076
 base = "light"
-primaryColor = "#8C2F39"
-backgroundColor = "#E6E5E2"
-secondaryBackgroundColor = "#F4F2EE"
-textColor = "#1F1B16"
+primaryColor = "#553C4B"
+backgroundColor = "#D7D7D9"
+secondaryBackgroundColor = "#E6E6E8"
+textColor = "#2F403D"
 
 [server]
 headless = true

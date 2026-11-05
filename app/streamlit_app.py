@@ -40,33 +40,36 @@ h1, h2, h3 { font-family: 'Cormorant Garamond', Georgia, serif !important; font-
 /* ---------- the whole page is the gallery wall ---------- */
 .stApp {
   background:
-    radial-gradient(ellipse 30% 420px at 18% 0, rgba(255,250,235,.85), transparent 75%),
-    radial-gradient(ellipse 30% 420px at 50% 0, rgba(255,250,235,.85), transparent 75%),
-    radial-gradient(ellipse 30% 420px at 82% 0, rgba(255,250,235,.85), transparent 75%),
-    linear-gradient(180deg, #E9E8E5 0%, #E2E1DE 60%, #D9D7D3 100%);
+    radial-gradient(ellipse 30% 420px at 18% 0, rgba(250,250,252,.9), transparent 75%),
+    radial-gradient(ellipse 30% 420px at 50% 0, rgba(250,250,252,.9), transparent 75%),
+    radial-gradient(ellipse 30% 420px at 82% 0, rgba(250,250,252,.9), transparent 75%),
+    linear-gradient(180deg, #E1E1E3 0%, #D7D7D9 55%, #CBCBCE 100%);
   background-attachment: fixed;
 }
+/* the palette as a thin band across the top: Rosebud, Deep Water, Glare, Rose Leaf, Lily Leaf */
+.stApp::before { content: ""; position: fixed; top: 0; left: 0; right: 0; height: 6px; z-index: 1000000;
+  background: linear-gradient(90deg, #553C4B 0 20%, #51698A 20% 40%, #B9B9BE 40% 60%, #425854 60% 80%, #829076 80%); }
 .block-container { padding-top: 3.2rem; padding-bottom: 0; max-width: 1480px; }
 
 /* header, lettered on the wall like an exhibition title */
 .mv-hero { text-align: center; padding-bottom: 1rem; }
-.mv-kicker { font-size: .7rem; letter-spacing: .34em; text-transform: uppercase; color: #8C2F39; }
+.mv-kicker { font-size: .7rem; letter-spacing: .34em; text-transform: uppercase; color: #553C4B; }
 .mv-wordmark { font-family: 'Cormorant Garamond', Georgia, serif !important; font-size: 4.8rem !important;
-               font-weight: 600; line-height: 1; color: #2A2622; margin: .35rem 0 .25rem;
+               font-weight: 600; line-height: 1; color: #2F403D; margin: .35rem 0 .25rem;
                text-shadow: 0 1px 0 rgba(255,255,255,.7); }
-.mv-wordmark em { color: #8C2F39; font-style: italic; font-weight: 500; }
-.mv-tagline { font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-size: 1.3rem; color: #5E574E; }
-.mv-stats { color: #8A8378; font-size: .7rem; letter-spacing: .08em; margin-top: .45rem; }
+.mv-wordmark em { color: #553C4B; font-style: italic; font-weight: 500; }
+.mv-tagline { font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-size: 1.3rem; color: #425854; }
+.mv-stats { color: #829076; font-size: .7rem; letter-spacing: .08em; margin-top: .45rem; }
 
 /* the control rail at the top: search mode, query, filters */
-.st-key-rail { background: rgba(255,255,255,.55); border: 1px solid rgba(120,100,60,.18); border-radius: 6px;
-               padding: .8rem 1rem .4rem; backdrop-filter: blur(4px); box-shadow: 0 2px 10px rgba(60,50,40,.06); }
-.mv-note { color: #6B645A; font-size: .8rem; text-align: center; margin-top: .3rem; }
+.st-key-rail { background: rgba(255,255,255,.55); border: 1px solid rgba(81,105,138,.22); border-radius: 6px;
+               padding: .8rem 1rem .4rem; backdrop-filter: blur(4px); box-shadow: 0 2px 10px rgba(81,105,138,.08); }
+.mv-note { color: #5C6B60; font-size: .8rem; text-align: center; margin-top: .3rem; }
 
 /* exhibition room title */
 .mv-roomtitle { text-align: center; margin: 2.6rem 0 .4rem; font-family: 'Cormorant Garamond', Georgia, serif;
-                font-size: .95rem; letter-spacing: .42em; text-transform: uppercase; color: #4A443C; }
-.mv-roomtitle::after { content: ""; display: block; width: 46px; height: 1px; background: #B0A48C; margin: .7rem auto 0; }
+                font-size: .95rem; letter-spacing: .42em; text-transform: uppercase; color: #51698A; }
+.mv-roomtitle::after { content: ""; display: block; width: 46px; height: 1px; background: #829076; margin: .7rem auto 0; }
 
 /* salon hang: rows of differently sized frames, centred like a hung wall */
 .mv-hang { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 3rem 3.4rem;
@@ -123,23 +126,23 @@ h1, h2, h3 { font-family: 'Cormorant Garamond', Georgia, serif !important; font-
 /* museum wall label, printed straight on the wall */
 .mv-label { margin-top: 1.05rem; text-align: center; max-width: 100%; }
 .mv-lt { font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-size: 1.04rem; line-height: 1.15;
-         color: #2A2622; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.mv-lm { font-size: .68rem; color: #6B645A; margin-top: .2rem; line-height: 1.4; }
+         color: #2F403D; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.mv-lm { font-size: .68rem; color: #5C6B60; margin-top: .2rem; line-height: 1.4; }
 .mv-la { margin-top: .35rem; font-size: .6rem; letter-spacing: .16em; text-transform: uppercase; }
-.mv-la a { color: #8C2F39 !important; text-decoration: none; margin: 0 .5rem; }
+.mv-la a { color: #553C4B !important; text-decoration: none; margin: 0 .5rem; }
 .mv-la a:hover { text-decoration: underline; }
-.mv-eyebrow { font-size: .6rem; letter-spacing: .22em; text-transform: uppercase; color: #8C2F39; margin-bottom: .15rem; }
+.mv-eyebrow { font-size: .6rem; letter-spacing: .22em; text-transform: uppercase; color: #553C4B; margin-bottom: .15rem; }
 
 /* featured (selected / uploaded) piece gets its own spotlight */
 .mv-featured { display: flex; justify-content: center; padding: 1.4rem 0 .6rem;
-               background: radial-gradient(ellipse 380px 300px at 50% 45%, rgba(255,250,232,.95), transparent 70%); }
+               background: radial-gradient(ellipse 380px 300px at 50% 45%, rgba(246,246,248,.95), transparent 70%); }
 .mv-featured .mv-piece { --w: 400px; }
-.mv-empty { text-align: center; color: #6B645A; font-family: 'Cormorant Garamond', Georgia, serif;
+.mv-empty { text-align: center; color: #5C6B60; font-family: 'Cormorant Garamond', Georgia, serif;
             font-size: 1.4rem; font-style: italic; padding: 3rem 0 2rem; }
 
 /* skirting board and floor across the bottom of the page */
 .mv-baseboard { width: 100vw; margin: 4rem 0 0 calc(50% - 50vw); height: 22px;
-                background: linear-gradient(#F7F6F3, #DCDAD5); border-top: 1px solid #C9C6BF; }
+                background: linear-gradient(#EEEEF0, #CFCFD3); border-top: 1px solid #BDBDC2; }
 .mv-floor { width: 100vw; margin-left: calc(50% - 50vw); height: 90px;
   background: linear-gradient(180deg, rgba(0,0,0,.18), rgba(255,255,255,.06) 40%, rgba(0,0,0,.2)),
     repeating-linear-gradient(90deg, #9A6A3E 0 140px, #7E522B 140px 142px, #A8764A 142px 290px, #7E522B 290px 292px); }
@@ -147,9 +150,9 @@ h1, h2, h3 { font-family: 'Cormorant Garamond', Georgia, serif !important; font-
              position: relative; }
 
 /* detail dialog */
-.mv-detail-img { width: 100%; height: 62vh; background: #F4F2EE center / contain no-repeat; }
-.mv-detail dt { font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; color: #8A8073; margin-top: .6rem; }
-.mv-detail dd { margin: 0; color: #1F1B16; }
+.mv-detail-img { width: 100%; height: 62vh; background: #E6E6E8 center / contain no-repeat; }
+.mv-detail dt { font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; color: #829076; margin-top: .6rem; }
+.mv-detail dd { margin: 0; color: #2F403D; }
 </style>
 """
 
