@@ -3,7 +3,6 @@
 Endpoints used:
   GET /departments
   GET /objects?departmentIds=N[&metadataDate=YYYY-MM-DD]   -> all IDs (optionally updated since)
-  GET /search?departmentId=N&hasImages=true&q=*             -> IDs that have images
   GET /objects/{id}                                         -> one object's metadata
 """
 from __future__ import annotations
@@ -76,7 +75,7 @@ class MetClient:
                 if status == 404 and allow_404:
                     return 404, None
                 if status not in self.RETRY_STATUSES:
-                    raise MetApiError(f"GET {url} -> {status}: {resp.text[:200]}")
+                    raise MetApiError(f"GET {url} -> {status}: {resp.text[:1000]}")
             if attempt == self.max_retries:
                 raise MetApiError(f"GET {url} failed after {attempt + 1} attempts (last: {status or err})")
             # exponential backoff with jitter, honouring Retry-After when given
@@ -95,11 +94,6 @@ class MetClient:
         if updated_since:
             params["metadataDate"] = updated_since.isoformat()
         data = self._get("/objects", params)[1]
-        return data.get("objectIDs") or []
-
-    def object_ids_with_images(self, department_id: int) -> list[int]:
-        params = {"departmentId": department_id, "hasImages": "true", "q": "*"}
-        data = self._get("/search", params)[1]
         return data.get("objectIDs") or []
 
     def get_object(self, object_id: int) -> tuple[int, dict | None]:

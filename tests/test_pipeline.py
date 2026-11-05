@@ -21,8 +21,7 @@ def run_full(conn, fake, tmp_path, cap=40):
     client = client_for(fake)
     run_id = db.start_run(conn, "full")
     ingest.load_departments(conn, client)
-    ingest.discover_full(conn, client, DEPTS, cap, run_id)
-    ingest.fetch_metadata(conn, client, run_id, workers=4, batch_size=15)
+    ingest.discover_and_fetch(conn, client, DEPTS, cap, run_id, workers=4, batch_size=15)
     ingest.transform(conn)
     images.download_images(conn, tmp_path / "img", rate_per_second=500, run_id=run_id)
     embed_pending(conn, FakeEmbedder(), batch_size=16, run_id=run_id)
@@ -36,17 +35,21 @@ def count(conn, sql, *params):
 
 def test_full_pipeline_respects_cap_and_filters(conn, fake_met, tmp_path):
     run_full(conn, fake_met, tmp_path, cap=40)
-    assert count(conn, "SELECT count(*) FROM stg_object_ids") == 80
+    n_ids = count(conn, "SELECT count(*) FROM stg_object_ids")
     assert count(conn, "SELECT count(*) FROM stg_object_ids WHERE needs_fetch") == 0
     # every core object is public domain with an image, and was embedded
     assert count(conn, "SELECT count(*) FROM objects WHERE NOT is_public_domain OR image_small_url IS NULL") == 0
+    # rounds stop once each department reaches the cap of usable objects (a batch can overshoot)
+    for dept in DEPTS:
+        n = count(conn, "SELECT count(*) FROM objects WHERE department_id = %s", dept)
+        assert 40 <= n <= 55, (dept, n)
     n_obj = count(conn, "SELECT count(*) FROM objects")
-    assert 0 < n_obj <= 80
+    assert n_ids > n_obj  # image-less / non-public records were fetched and filtered out
     assert count(conn, "SELECT count(*) FROM object_embeddings") == n_obj
     assert count(conn, "SELECT count(*) FROM object_tags") > 0
     assert count(conn, "SELECT count(*) FROM objects WHERE begin_year IS NULL") == 0
     run = conn.execute("SELECT status, objects_fetched, objects_embedded FROM ingest_runs").fetchone()
-    assert run == ("succeeded", 80, n_obj)
+    assert run == ("succeeded", n_ids, n_obj)
 
 
 def test_transform_is_idempotent(conn, fake_met, tmp_path):
@@ -64,23 +67,25 @@ def test_fetch_resumes_and_retries(conn, fake_met):
     client = client_for(fake_met)
     run_id = db.start_run(conn, "full")
     ingest.load_departments(conn, client)
-    ingest.discover_full(conn, client, [6], 30, run_id)
+    queued = ingest.discover_full(conn, client, [6], 20, run_id)
+    assert queued > 20                                          # oversampled: not every record is usable
     ingest.fetch_metadata(conn, client, run_id, limit=10)       # "crash" after 10
-    assert count(conn, "SELECT count(*) FROM stg_object_ids WHERE needs_fetch") == 20
+    assert count(conn, "SELECT count(*) FROM stg_object_ids WHERE needs_fetch") == queued - 10
     fake_met.fail_next = 2                                      # transient 503s get retried
     before = fake_met.requests
     ingest.fetch_metadata(conn, client, run_id)
     assert count(conn, "SELECT count(*) FROM stg_object_ids WHERE needs_fetch") == 0
-    assert fake_met.requests - before == 22                     # only the remaining 20 (+2 retries)
-    assert count(conn, "SELECT count(*) FROM stg_objects_raw") == 30
+    assert fake_met.requests - before == queued - 10 + 2        # only the remainder (+2 retries)
+    assert count(conn, "SELECT count(*) FROM stg_objects_raw") == queued
 
 
-def test_discovery_rerun_does_not_grow_past_cap(conn, fake_met):
+def test_discovery_rerun_is_idempotent(conn, fake_met):
     client = client_for(fake_met)
     run_id = db.start_run(conn, "full")
-    ingest.discover_full(conn, client, [6], 25, run_id)
-    ingest.discover_full(conn, client, [6], 25, run_id)
-    assert count(conn, "SELECT count(*) FROM stg_object_ids") == 25
+    ingest.discover_and_fetch(conn, client, [6], 25, run_id)
+    n_ids = count(conn, "SELECT count(*) FROM stg_object_ids")
+    ingest.discover_and_fetch(conn, client, [6], 25, run_id)
+    assert count(conn, "SELECT count(*) FROM stg_object_ids") == n_ids
 
 
 def test_incremental_picks_up_new_and_withdrawn(conn, fake_met, tmp_path):

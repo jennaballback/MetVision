@@ -49,27 +49,48 @@ def _enqueue(conn: psycopg.Connection, ids: list[int], department_id: int, run_i
     return len(ids)
 
 
+USABLE_SQL = """
+    SELECT count(*) FROM stg_objects_raw r JOIN stg_object_ids i USING (object_id)
+    WHERE i.department_id = %s AND r.http_status = 200
+      AND (r.payload->>'isPublicDomain')::boolean
+      AND coalesce(r.payload->>'primaryImageSmall', '') <> ''"""
+
+
 def discover_full(conn: psycopg.Connection, client: MetClient, department_ids: list[int],
                   cap_per_department: int, run_id: int) -> int:
-    """Pick up to `cap_per_department` objects that have images, per department.
+    """Queue the next batch of object IDs per department, aiming for about
+    `cap_per_department` usable objects (public domain, with an image).
 
-    The /search endpoint pre-filters to objects with images, which avoids fetching
-    thousands of image-less records. We take a seeded random sample rather than the
-    first N IDs because IDs cluster by accession batch (one donor, one site, ...).
-    Already-known objects are kept, so re-running is idempotent and never shrinks the set.
+    The ID list itself doesn't say which objects have images (the Met retired the
+    /search endpoint that could filter on that in Oct 2026), so discovery runs in
+    rounds: queue a batch, fetch it, see what share was usable, queue more. The
+    pipeline calls this until it returns 0. IDs are taken in a seeded random order,
+    not first-N, because IDs cluster by accession batch (one donor, one site, ...).
+    Already-known objects are kept, so re-running is idempotent.
     """
     conn.execute(DEPT_STATE_DDL)
     total = 0
     for dept in department_ids:
-        with_images = sorted(client.object_ids_with_images(dept))
-        all_ids = client.object_ids(dept)
-        known = {r[0] for r in conn.execute(
-            "SELECT object_id FROM stg_object_ids WHERE department_id = %s", (dept,))}
-        room = max(0, cap_per_department - len(known))
-        candidates = [i for i in with_images if i not in known]
-        sample = random.Random(SAMPLE_SEED + dept).sample(candidates, min(room, len(candidates)))
-        log.info("dept %s: %d ids, %d with images, %d known, enqueueing %d",
-                 dept, len(all_ids), len(with_images), len(known), len(sample))
+        all_ids = sorted(client.object_ids(dept))
+        rows = conn.execute(
+            "SELECT object_id, needs_fetch FROM stg_object_ids WHERE department_id = %s", (dept,)).fetchall()
+        known = {r[0] for r in rows}
+        pending = sum(1 for r in rows if r[1])
+        fetched = len(rows) - pending
+        usable = conn.execute(USABLE_SQL, (dept,)).fetchone()[0]
+        need = cap_per_department - usable
+        if pending or need <= 0:
+            log.info("dept %s: %d usable of %d fetched, %d pending; nothing to queue",
+                     dept, usable, fetched, pending)
+            continue
+        # Size the batch from the share of usable records seen so far (guess 50% at first).
+        rate = max(usable / fetched, 0.05) if fetched >= 50 else 0.5
+        batch = min(int(need / rate) + 1, need * 20)
+        order = all_ids[:]
+        random.Random(SAMPLE_SEED + dept).shuffle(order)
+        sample = [i for i in order if i not in known][:batch]
+        log.info("dept %s: %d ids, %d usable so far, queueing %d (est. %.0f%% usable)",
+                 dept, len(all_ids), usable, len(sample), 100 * rate)
         total += _enqueue(conn, sample, dept, run_id)
         conn.execute(
             """INSERT INTO department_state (department_id, max_seen_object_id) VALUES (%s, %s)
@@ -81,6 +102,21 @@ def discover_full(conn: psycopg.Connection, client: MetClient, department_ids: l
         conn.commit()
     update_run(conn, run_id, ids_discovered=total)
     return total
+
+
+def discover_and_fetch(conn: psycopg.Connection, client: MetClient, department_ids: list[int],
+                       cap_per_department: int, run_id: int, limit: int | None = None, **fetch_kw) -> None:
+    """Rounds of discover -> fetch until each department has ~cap usable objects.
+
+    discover_full skips a department while it still has queued IDs, so an
+    interrupted run first finishes what it had queued. With `limit` (smoke tests)
+    only one round runs.
+    """
+    while True:
+        n = discover_full(conn, client, department_ids, cap_per_department, run_id)
+        fetched = fetch_metadata(conn, client, run_id, limit=limit, **fetch_kw)
+        if limit or (n == 0 and fetched == 0):
+            return
 
 
 def discover_incremental(conn: psycopg.Connection, client: MetClient, department_ids: list[int],

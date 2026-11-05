@@ -31,7 +31,7 @@ Met API ──► stg_object_ids ──► stg_objects_raw (JSONB) ──SQL─�
 
 | Step | Code | Notes |
 |---|---|---|
-| Discover | `metsearch/ingest.py: discover_full` | `/search?hasImages=true` per department, seeded random sample up to `MAX_OBJECTS_PER_DEPT`. Re-running never grows past the cap. |
+| Discover | `metsearch/ingest.py: discover_and_fetch` | Department ID list in a seeded random order, queued in rounds sized from the share of usable records seen so far, until each department has about `MAX_OBJECTS_PER_DEPT` public-domain objects with images. Re-running is idempotent. |
 | Fetch | `ingest.fetch_metadata` | Token-bucket rate limiter (default 15 req/s; the Met allows < 80), exponential backoff on 403/429/5xx, raw JSON into staging. The cursor is `stg_object_ids.needs_fetch`, flipped in the same transaction that stores the response, so a crash loses at most one batch. |
 | Transform | `sql/transform.sql` | Staging → core with idempotent upserts in one transaction. Only public-domain objects with an image are promoted. Withdrawn objects (404) are deleted. |
 | Images | `metsearch/images.py` | `primaryImageSmall`, resized to ≤512px, cached on disk, skipped if present, 5 req/s. |
@@ -47,9 +47,10 @@ Met API ──► stg_object_ids ──► stg_objects_raw (JSONB) ──SQL─�
 - **Dates:** `objectDate` is free text ("ca. 1850", "late 12th century", "1550–1295 B.C."). Filters use
   the integer `objectBeginDate` / `objectEndDate` instead, with an overlap test (a work dated 1790–1810
   matches "1800s"). The API reports unknown dates as `0`/`0`; those become `NULL`.
-- **Images:** most of the collection has no image or is not public domain. Discovery uses the
-  `hasImages` search to avoid fetching those at all, and the transform filters again on
-  `isPublicDomain` and `primaryImageSmall`.
+- **Images:** most of the collection has no image or is not public domain, and the ID list doesn't say
+  which. (The Met retired the `/search?hasImages=true` endpoint in October 2026.) So discovery fetches in
+  rounds, measures the usable share, and queues just enough more to reach the cap; the transform only
+  promotes records with `isPublicDomain` and a `primaryImageSmall`.
 - **Tags:** missing on many records, so they enrich the text embedding and keyword search but are
   never required.
 - **Sampling:** object IDs cluster by accession batch (one donor, one excavation), so the first N IDs
@@ -73,7 +74,7 @@ pip install torch --index-url https://download.pytorch.org/whl/cpu
 pip install -r requirements.txt
 
 python -m metsearch run --limit 50   # smoke test: 50 objects through every step
-python -m metsearch run              # one department, ~5K objects (fetch ~6 min, CLIP ~10-20 min on CPU)
+python -m metsearch run              # one department, ~5K usable objects (fetch ~10-15 min, CLIP ~10-20 min on CPU)
 python -m metsearch stats
 python -m metsearch eval --n 500     # writes eval/results_image.{md,json}
 python -m metsearch eval --embedding text

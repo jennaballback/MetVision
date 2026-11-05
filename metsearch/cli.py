@@ -37,11 +37,12 @@ def _pipeline(args, s, conn, kind: str):
         client = _client(s)
         ingest.load_departments(conn, client)
         if kind == "full":
-            n = ingest.discover_full(conn, client, s.departments, args.cap or s.max_objects_per_department, run_id)
+            ingest.discover_and_fetch(conn, client, s.departments,
+                                      args.cap or s.max_objects_per_department, run_id, limit=args.limit)
         else:
             n = ingest.discover_incremental(conn, client, s.departments, since, run_id)
-        log.info("queued %d objects", n)
-        ingest.fetch_metadata(conn, client, run_id, limit=args.limit)
+            log.info("queued %d objects", n)
+            ingest.fetch_metadata(conn, client, run_id, limit=args.limit)
         log.info("transform: %s", ingest.transform(conn))
         if not args.skip_images:
             log.info("images: %s", images.download_images(
@@ -69,7 +70,7 @@ def cmd_discover(args, s, conn):
     ingest.load_departments(conn, client)
     n = ingest.discover_full(conn, client, s.departments, args.cap or s.max_objects_per_department, run_id)
     db.finish_run(conn, run_id, "succeeded")
-    print(f"queued {n} ids")
+    print(f"queued {n} ids (one round; `run` repeats discover + fetch until the cap is met)")
 
 
 def cmd_fetch(args, s, conn):

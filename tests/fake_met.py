@@ -151,14 +151,13 @@ class FakeMet:
                 q = {k: v[0] for k, v in parse_qs(u.query).items()}
                 if u.path == "/v1/departments":
                     return self._json(200, {"departments": DEPARTMENTS})
-                if u.path in ("/v1/objects", "/v1/search"):
-                    dept_key = "departmentIds" if u.path == "/v1/objects" else "departmentId"
-                    did = int(q.get(dept_key, 0))
+                if u.path == "/v1/search":  # retired by the Met on 2026-10-01
+                    return self._json(410, {"message": "/public/collection/v1/search was retired on 2026-10-01."})
+                if u.path == "/v1/objects":
+                    did = int(q.get("departmentIds", 0))
                     name = next((d["displayName"] for d in DEPARTMENTS if d["departmentId"] == did), None)
                     ids = [o["objectID"] for o in fake.catalog.values()
                            if (name is None or o["department"] == name) and o["objectID"] not in fake.withdrawn]
-                    if u.path == "/v1/search" and q.get("hasImages") == "true":
-                        ids = [i for i in ids if fake.catalog[i]["primaryImageSmall"]]
                     if "metadataDate" in q:
                         ids = [i for i in ids if fake.updated_since.get(i, "0000") >= q["metadataDate"]]
                     return self._json(200, {"total": len(ids), "objectIDs": sorted(ids) or None})
